@@ -1,0 +1,4 @@
+10 allow tcp from 147.229.1.1 to any dst-port 80
+20 allow udp from any to 8.8.8.8 src-port 53
+30 allow icmp from 147.229.1.1 to any
+40 deny ip from any to any
