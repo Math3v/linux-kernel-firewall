@@ -46,18 +46,42 @@ void yyerror(const char *s);
 %token <portval> PORT
 %token <rules> RULES
 %token <line_num> ENDL
+%token <sval> ACTION
+%token <sval> PROTO
+%token <sval> SRCIP
+
+%token SRCPORT
+%token DSTPORT
+%token FROM
+%token DEST
+
+%start all
 
 %%
 // this is the actual grammar that bison will parse, but for right now it's just
 // something silly to echo to the screen what bison gets from flex.  We'll
 // make a real one shortly:
+all:
+	all line
+	| line
+	;
+
+line:
+	snazzle endl
+	| snazzle srcport endl
+	| snazzle dstport endl
+	;
 snazzle:
-	STRING snazzle {
-		cout << "bison found a string: " << $1 << endl; 
-	}
-	| STRING {
-		cout << "bison snazzle string: " << $1 << endl;
-	}
+	INT ACTION PROTO FROM SRCIP DEST SRCIP { cout << "all matched: " << endl; }
+	;
+srcport:
+	SRCPORT INT { cout << "srcport: " << $2 << endl; }
+	;
+dstport:
+	DSTPORT INT { cout << "dstport: " << $2 << endl; }
+	;
+endl:
+	ENDL { ; }
 	;
 %%
 

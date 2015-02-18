@@ -65,7 +65,14 @@ extern int yydebug;
     IPADDR = 261,
     PORT = 262,
     RULES = 263,
-    ENDL = 264
+    ENDL = 264,
+    ACTION = 265,
+    PROTO = 266,
+    SRCIP = 267,
+    SRCPORT = 268,
+    DSTPORT = 269,
+    FROM = 270,
+    DEST = 271
   };
 #endif
 
@@ -83,7 +90,7 @@ union YYSTYPE
 	int portval;
 	rules_t rules;
 
-#line 87 "snazzle.tab.h" /* yacc.c:1909  */
+#line 94 "snazzle.tab.h" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1

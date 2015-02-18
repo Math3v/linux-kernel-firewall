@@ -1,3 +1,4 @@
+%option interactive
 %{
 #define YY_DECL extern "C" int yylex()
 
@@ -8,11 +9,15 @@
 int line_num = 1;
 %}
 %%
-[ \t]          ;
-\n 			   { ++line_num; return ENDL; }
-[0-9]+\ (allow|deny)\ (tcp|udp|icmp|ip)\ from\ ([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+|any)\ to\ ([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+|any)(\n|[[:space:]])?(src-port\ [0-9]+[[:space:]]?)*(\n)?(dst-port\ [0-9]+)*(\n)? {
-	yylval.sval = strdup(yytext);
-	return STRING;
-}
-.                ;
+[ \t]          									;
+[0-9]+											{ yylval.ival = atoi(yytext);   return INT;		}
+(allow|deny)									{ yylval.sval = strdup(yytext); return ACTION;	}
+(tcp|udp|icmp|ip)								{ yylval.sval = strdup(yytext); return PROTO;	}
+from											{ return FROM; }
+([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+|any)			{ yylval.sval = strdup(yytext); return SRCIP;	}
+to												{ return DEST; }	
+src-port										{ return SRCPORT;	}
+dst-port										{ return DSTPORT;	}
+\n 			   									{ ++line_num; return ENDL; 						}
+.                								;
 %%
