@@ -806,26 +806,28 @@ case 2:
 YY_RULE_SETUP
 #line 15 "snazzle.l"
 {
-	printf("flex found: '%s'", yytext);
+	printf("flex found: %s", yytext);
+	yylval.sval = strdup("OK");
 	token = strtok(yytext, delim);
 	while(token != NULL){
 		//printf("token '%s'\n", token);
 		token = strtok(NULL, delim);
 	}
 	//printf("\n");
+	return STRING;
 }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 24 "snazzle.l"
+#line 26 "snazzle.l"
 ;
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 25 "snazzle.l"
+#line 27 "snazzle.l"
 ECHO;
 	YY_BREAK
-#line 829 "lex.yy.c"
+#line 831 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1823,6 +1825,6 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 25 "snazzle.l"
+#line 27 "snazzle.l"
 
 
