@@ -368,8 +368,8 @@ static void yy_fatal_error (yyconst char msg[]  );
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
 
-#define YY_NUM_RULES 4
-#define YY_END_OF_BUFFER 5
+#define YY_NUM_RULES 5
+#define YY_END_OF_BUFFER 6
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -379,15 +379,15 @@ struct yy_trans_info
 	};
 static yyconst flex_int16_t yy_accept[84] =
     {   0,
-        0,    0,    5,    3,    1,    1,    3,    0,    0,    0,
+        0,    0,    6,    4,    1,    2,    4,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    2,    0,    2,    2,    0,    0,    0,    2,    0,
-        0,    0,    2,    0,    0,    2,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,    0,    0,    0,    2,    2,
-        2,    2,    0
+        0,    3,    0,    3,    3,    0,    0,    0,    3,    0,
+        0,    0,    3,    0,    0,    3,    0,    0,    0,    0,
+        0,    0,    0,    0,    0,    0,    0,    0,    3,    3,
+        3,    3,    0
     } ;
 
 static yyconst flex_int32_t yy_ec[256] =
@@ -519,11 +519,8 @@ char *yytext;
 #include <string.h>
 
 #include "snazzle.tab.h"
-
-const char delim[2] = " ";
-char *token;
-
-#line 527 "lex.yy.c"
+int line_num = 1;
+#line 524 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -710,9 +707,9 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 13 "snazzle.l"
+#line 10 "snazzle.l"
 
-#line 716 "lex.yy.c"
+#line 713 "lex.yy.c"
 
 	if ( !(yy_init) )
 		{
@@ -796,38 +793,36 @@ do_action:	/* This label is used only to access EOF actions. */
 			goto yy_find_action;
 
 case 1:
-/* rule 1 can match eol */
 YY_RULE_SETUP
-#line 14 "snazzle.l"
+#line 11 "snazzle.l"
 ;
 	YY_BREAK
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 15 "snazzle.l"
+#line 12 "snazzle.l"
+{ ++line_num; return ENDL; }
+	YY_BREAK
+case 3:
+/* rule 3 can match eol */
+YY_RULE_SETUP
+#line 13 "snazzle.l"
 {
-	printf("flex found: %s", yytext);
-	yylval.sval = strdup("OK");
-	token = strtok(yytext, delim);
-	while(token != NULL){
-		//printf("token '%s'\n", token);
-		token = strtok(NULL, delim);
-	}
-	//printf("\n");
+	yylval.sval = strdup(yytext);
 	return STRING;
 }
 	YY_BREAK
-case 3:
-YY_RULE_SETUP
-#line 26 "snazzle.l"
-;
-	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 27 "snazzle.l"
+#line 17 "snazzle.l"
+;
+	YY_BREAK
+case 5:
+YY_RULE_SETUP
+#line 18 "snazzle.l"
 ECHO;
 	YY_BREAK
-#line 831 "lex.yy.c"
+#line 826 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1825,6 +1820,6 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 27 "snazzle.l"
+#line 18 "snazzle.l"
 
 

@@ -5,22 +5,13 @@
 #include <string.h>
 
 #include "snazzle.tab.h"
-
-const char delim[2] = " ";
-char *token;
-
+int line_num = 1;
 %}
 %%
-[ \t\n]          ;
+[ \t]          ;
+\n 			   { ++line_num; return ENDL; }
 [0-9]+\ (allow|deny)\ (tcp|udp|icmp|ip)\ from\ ([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+|any)\ to\ ([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+|any)(\n|[[:space:]])?(src-port\ [0-9]+[[:space:]]?)*(\n)?(dst-port\ [0-9]+)*(\n)? {
-	printf("flex found: %s", yytext);
-	yylval.sval = strdup("OK");
-	token = strtok(yytext, delim);
-	while(token != NULL){
-		//printf("token '%s'\n", token);
-		token = strtok(NULL, delim);
-	}
-	//printf("\n");
+	yylval.sval = strdup(yytext);
 	return STRING;
 }
 .                ;

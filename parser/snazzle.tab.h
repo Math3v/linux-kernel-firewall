@@ -39,6 +39,20 @@
 #if YYDEBUG
 extern int yydebug;
 #endif
+/* "%code requires" blocks.  */
+#line 20 "snazzle.y" /* yacc.c:1909  */
+
+		struct rules_t {
+		int id;
+		char *action;
+		char *proto;
+		unsigned int src_ip;
+		unsigned int dst_ip;
+		unsigned short src_port;
+		unsigned short dst_port;
+	};
+
+#line 56 "snazzle.tab.h" /* yacc.c:1909  */
 
 /* Token type.  */
 #ifndef YYTOKENTYPE
@@ -49,7 +63,9 @@ extern int yydebug;
     FLOAT = 259,
     STRING = 260,
     IPADDR = 261,
-    PORT = 262
+    PORT = 262,
+    RULES = 263,
+    ENDL = 264
   };
 #endif
 
@@ -58,15 +74,16 @@ extern int yydebug;
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 19 "snazzle.y" /* yacc.c:1909  */
+#line 31 "snazzle.y" /* yacc.c:1909  */
 
 	int ival;
 	float fval;
 	char *sval;
 	unsigned int ipval;
 	int portval;
+	rules_t rules;
 
-#line 70 "snazzle.tab.h" /* yacc.c:1909  */
+#line 87 "snazzle.tab.h" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
