@@ -19,7 +19,7 @@ extern void yyerror(const char *s);
 
 int main(){
 	// open a file handle to a particular file:
-	FILE *myfile = fopen("a.snazzle.file", "r");
+	FILE *myfile = fopen("../a.snazzle.file", "r");
 	// make sure it is valid:
 	if (!myfile) {
 		cout << "I can't open a.snazzle.file!" << endl;

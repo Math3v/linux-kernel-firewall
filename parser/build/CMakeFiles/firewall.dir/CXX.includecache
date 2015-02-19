@@ -1,0 +1,26 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/matej/dev/linux/pds/linux-kernel-firewall/parser/snazzle.tab.h
+
+/home/matej/dev/linux/pds/linux-kernel-firewall/parser/test.c
+iostream
+-
+list
+-
+stdio.h
+-
+stdlib.h
+-
+snazzle.tab.h
+/home/matej/dev/linux/pds/linux-kernel-firewall/parser/snazzle.tab.h
+test.h
+/home/matej/dev/linux/pds/linux-kernel-firewall/parser/test.h
+
+/home/matej/dev/linux/pds/linux-kernel-firewall/parser/test.h
+
