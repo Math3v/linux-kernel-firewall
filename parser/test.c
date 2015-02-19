@@ -33,8 +33,9 @@ int main(){
 		yyparse();
 	} while (!feof(yyin));
 
-	std::list<rules_t>::iterator i = rulesList.begin();
-	cout << i->id << endl;
+	for(std::list<rules_t>::iterator i = rulesList.begin(); i != rulesList.end(); ++i){
+		cout << i->id << endl;
+	}
 
 	return 0;
 }
