@@ -3,4 +3,4 @@
 30 allow icmp from 147.229.1.1 to any
 40 deny ip from any to any
 50 deny icmp from any to 1.1.1.1
-60 allow ip from any to any
+60 allow ip from any to any src-port 20 dst-port 21
