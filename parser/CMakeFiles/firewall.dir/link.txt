@@ -1,1 +1,0 @@
-/usr/bin/c++       CMakeFiles/firewall.dir/snazzle.tab.c.o CMakeFiles/firewall.dir/lex.yy.c.o CMakeFiles/firewall.dir/test.c.o  -o firewall -rdynamic -lfl 
