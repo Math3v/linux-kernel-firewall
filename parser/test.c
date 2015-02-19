@@ -8,22 +8,20 @@ using namespace std;
 #include "snazzle.tab.h"
 #include "test.h"
 
-//extern "C" int yylex();
-//extern "C" int yyparse();
 extern "C" FILE *yyin;
 extern int line_num;
-
-//struct rules_t;
-
 extern void yyerror(const char *s);
 
-int main(){
-	// open a file handle to a particular file:
+void yyerror(const char *s) {
+       cout << "EEK, parse error!  Message: " << s << " on line: " << line_num;
+       exit(-1);
+}
+
+void parseRules(){
 	FILE *myfile = fopen("../a.snazzle.file", "r");
-	// make sure it is valid:
 	if (!myfile) {
 		cout << "I can't open a.snazzle.file!" << endl;
-		return -1;
+		exit(-1);
 	}
 	// set flex to read from it instead of defaulting to STDIN:
 	yyin = myfile;
@@ -33,15 +31,21 @@ int main(){
 		yyparse();
 	} while (!feof(yyin));
 
-	for(std::list<rules_t>::iterator i = rulesList.begin(); i != rulesList.end(); ++i){
-		cout << i->id << endl;
+	for(std::list<rule_t>::iterator i = rulesList.begin(); i != rulesList.end(); ++i){
+		cout << i->id << " ";
+		cout << i->action << " ";
+		cout << i->proto << " ";
+		cout << i->src_ip << " ";
+		cout << i->dst_ip << " ";
+		cout << i->src_port << " ";
+		cout << i->dst_port << " ";
+		cout << endl;
 	}
-
-	return 0;
 }
 
-void yyerror(const char *s) {
-       cout << "EEK, parse error!  Message: " << s << " on line: " << line_num;
-       // might as well halt now:
-       exit(-1);
+int main(){
+
+	parseRules();
+
+	return 0;
 }

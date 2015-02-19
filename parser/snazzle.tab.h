@@ -46,19 +46,16 @@ extern int yydebug;
   enum yytokentype
   {
     INT = 258,
-    FLOAT = 259,
-    STRING = 260,
-    IPADDR = 261,
-    PORT = 262,
-    RULES = 263,
-    ENDL = 264,
-    ACTION = 265,
-    PROTO = 266,
-    SRCIP = 267,
-    SRCPORT = 268,
-    DSTPORT = 269,
-    FROM = 270,
-    DEST = 271
+    STRING = 259,
+    PORT = 260,
+    ENDL = 261,
+    ACTION = 262,
+    PROTO = 263,
+    IP = 264,
+    SRCPORT = 265,
+    DSTPORT = 266,
+    FROM = 267,
+    DEST = 268
   };
 #endif
 
@@ -67,15 +64,12 @@ extern int yydebug;
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 29 "snazzle.y" /* yacc.c:1909  */
+#line 21 "snazzle.y" /* yacc.c:1909  */
 
 	int ival;
-	float fval;
 	char *sval;
-	unsigned int ipval;
-	unsigned short portval;
 
-#line 79 "snazzle.tab.h" /* yacc.c:1909  */
+#line 73 "snazzle.tab.h" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1

@@ -72,20 +72,17 @@ using namespace std;
 #include <string.h>
 #include "test.h"
 
-// stuff from flex that bison needs to know about:
 extern "C" int yylex();
-//extern "C" int yyparse();
 extern "C" FILE *yyin;
 extern int line_num;
 
 struct rules_t;
-rules_t rule;
-//extern rules_t rule;
-std::list<rules_t> rulesList;
+rule_t rule;
+std::list<rule_t> rulesList;
  
 void yyerror(const char *s);
 
-#line 89 "snazzle.tab.c" /* yacc.c:339  */
+#line 86 "snazzle.tab.c" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -121,19 +118,16 @@ extern int yydebug;
   enum yytokentype
   {
     INT = 258,
-    FLOAT = 259,
-    STRING = 260,
-    IPADDR = 261,
-    PORT = 262,
-    RULES = 263,
-    ENDL = 264,
-    ACTION = 265,
-    PROTO = 266,
-    SRCIP = 267,
-    SRCPORT = 268,
-    DSTPORT = 269,
-    FROM = 270,
-    DEST = 271
+    STRING = 259,
+    PORT = 260,
+    ENDL = 261,
+    ACTION = 262,
+    PROTO = 263,
+    IP = 264,
+    SRCPORT = 265,
+    DSTPORT = 266,
+    FROM = 267,
+    DEST = 268
   };
 #endif
 
@@ -142,15 +136,12 @@ extern int yydebug;
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 29 "snazzle.y" /* yacc.c:355  */
+#line 21 "snazzle.y" /* yacc.c:355  */
 
 	int ival;
-	float fval;
 	char *sval;
-	unsigned int ipval;
-	unsigned short portval;
 
-#line 154 "snazzle.tab.c" /* yacc.c:355  */
+#line 145 "snazzle.tab.c" /* yacc.c:355  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
@@ -165,7 +156,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 169 "snazzle.tab.c" /* yacc.c:358  */
+#line 160 "snazzle.tab.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -407,10 +398,10 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  6
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   22
+#define YYLAST   24
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  17
+#define YYNTOKENS  14
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  7
 /* YYNRULES -- Number of rules.  */
@@ -421,7 +412,7 @@ union yyalloc
 /* YYTRANSLATE[YYX] -- Symbol number corresponding to YYX as returned
    by yylex, with out-of-bounds checking.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   271
+#define YYMAXUTOK   268
 
 #define YYTRANSLATE(YYX)                                                \
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -456,16 +447,15 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-       5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
-      15,    16
+       5,     6,     7,     8,     9,    10,    11,    12,    13
 };
 
 #if YYDEBUG
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    62,    62,    63,    67,    68,    69,    70,    73,    83,
-      89,    95
+       0,    44,    44,    45,    49,    50,    51,    52,    55,    64,
+      69,    74
 };
 #endif
 
@@ -474,10 +464,9 @@ static const yytype_uint8 yyrline[] =
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "$end", "error", "$undefined", "INT", "FLOAT", "STRING", "IPADDR",
-  "PORT", "RULES", "ENDL", "ACTION", "PROTO", "SRCIP", "SRCPORT",
-  "DSTPORT", "FROM", "DEST", "$accept", "all", "line", "snazzle",
-  "srcport", "dstport", "endl", YY_NULLPTR
+  "$end", "error", "$undefined", "INT", "STRING", "PORT", "ENDL",
+  "ACTION", "PROTO", "IP", "SRCPORT", "DSTPORT", "FROM", "DEST", "$accept",
+  "all", "line", "base", "srcport", "dstport", "endl", YY_NULLPTR
 };
 #endif
 
@@ -487,7 +476,7 @@ static const char *const yytname[] =
 static const yytype_uint16 yytoknum[] =
 {
        0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
-     265,   266,   267,   268,   269,   270,   271
+     265,   266,   267,   268
 };
 # endif
 
@@ -505,9 +494,9 @@ static const yytype_uint16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-       7,     1,     2,   -12,    -6,     3,   -12,   -12,   -12,     9,
-      10,    -5,     6,   -12,     4,   -12,   -12,     6,   -12,   -12,
-       5,   -12,     0,     8,   -12
+       7,     4,     2,   -12,    -3,     5,   -12,   -12,   -12,     9,
+      11,    -2,    10,   -12,     3,   -12,   -12,    10,   -12,   -12,
+       8,   -12,     6,    12,   -12
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -523,7 +512,7 @@ static const yytype_uint8 yydefact[] =
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -12,   -12,    16,   -12,   -12,    11,   -11
+     -12,   -12,    16,   -12,   -12,    13,   -11
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
@@ -538,31 +527,31 @@ static const yytype_int8 yydefgoto[] =
 static const yytype_uint8 yytable[] =
 {
       18,    19,     6,     8,     8,     1,    21,     9,    10,    10,
-       1,     5,    15,    16,    14,     8,    23,    22,     7,    20,
-      24,     0,    17
+       1,     5,    15,    14,    16,    20,     8,    22,     7,    23,
+       0,    24,     0,     0,    17
 };
 
 static const yytype_int8 yycheck[] =
 {
-      11,    12,     0,     9,     9,     3,    17,    13,    14,    14,
-       3,    10,     3,     3,    11,     9,    16,    12,     2,    15,
-      12,    -1,    11
+      11,    12,     0,     6,     6,     3,    17,    10,    11,    11,
+       3,     7,     3,     8,     3,    12,     6,     9,     2,    13,
+      -1,     9,    -1,    -1,    11
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,     3,    18,    19,    20,    10,     0,    19,     9,    13,
-      14,    21,    22,    23,    11,     3,     3,    22,    23,    23,
-      15,    23,    12,    16,    12
+       0,     3,    15,    16,    17,     7,     0,    16,     6,    10,
+      11,    18,    19,    20,     8,     3,     3,    19,    20,    20,
+      12,    20,     9,    13,     9
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    17,    18,    18,    19,    19,    19,    19,    20,    21,
-      22,    23
+       0,    14,    15,    15,    16,    16,    16,    16,    17,    18,
+      19,    20
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
@@ -1246,54 +1235,36 @@ yyreduce:
   switch (yyn)
     {
         case 8:
-#line 73 "snazzle.y" /* yacc.c:1646  */
+#line 55 "snazzle.y" /* yacc.c:1646  */
     {
-	 //cout << "all matched: " << endl; 
 	 rule.id = (yyvsp[-6].ival);
 	 rule.action = strdup((yyvsp[-5].sval));
 	 rule.proto = strdup((yyvsp[-4].sval));
 	 rule.src_ip = strdup((yyvsp[-2].sval));
 	 rule.dst_ip = strdup((yyvsp[0].sval));
 	 }
-#line 1259 "snazzle.tab.c" /* yacc.c:1646  */
+#line 1247 "snazzle.tab.c" /* yacc.c:1646  */
     break;
 
   case 9:
-#line 83 "snazzle.y" /* yacc.c:1646  */
+#line 64 "snazzle.y" /* yacc.c:1646  */
     { 
-		//cout << "srcport: " << $2 << endl; 
 		rule.src_port = (yyvsp[0].ival);
 	}
-#line 1268 "snazzle.tab.c" /* yacc.c:1646  */
+#line 1255 "snazzle.tab.c" /* yacc.c:1646  */
     break;
 
   case 10:
-#line 89 "snazzle.y" /* yacc.c:1646  */
+#line 69 "snazzle.y" /* yacc.c:1646  */
     { 
-		//cout << "dstport: " << $2 << endl; 
 		rule.dst_port = (yyvsp[0].ival);
 	}
-#line 1277 "snazzle.tab.c" /* yacc.c:1646  */
+#line 1263 "snazzle.tab.c" /* yacc.c:1646  */
     break;
 
   case 11:
-#line 95 "snazzle.y" /* yacc.c:1646  */
+#line 74 "snazzle.y" /* yacc.c:1646  */
     { 
-		cout << "RID: " << rule.id << " ";
-		cout << "ACTION: " << rule.action << " ";
-		cout << "PROTO: " << rule.proto << " "; 
-		cout << "SRCIP: " << rule.src_ip << " ";
-		cout << "DSTIP: " << rule.dst_ip << " ";
-
-		if(rule.src_port != 0){
-			cout << "SCRPORT: " << rule.src_port << " ";
-		}
-		if(rule.dst_port != 0){
-			cout << "DSTPORT: " << rule.dst_port << " ";
-		}
-
-		cout << endl;
-
 		rulesList.push_back(rule);
 
 		/* Clean up rule */
@@ -1305,11 +1276,11 @@ yyreduce:
 		rule.src_port = 0;
 		rule.dst_port = 0;
 	}
-#line 1309 "snazzle.tab.c" /* yacc.c:1646  */
+#line 1280 "snazzle.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1313 "snazzle.tab.c" /* yacc.c:1646  */
+#line 1284 "snazzle.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1537,4 +1508,4 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 123 "snazzle.y" /* yacc.c:1906  */
+#line 87 "snazzle.y" /* yacc.c:1906  */

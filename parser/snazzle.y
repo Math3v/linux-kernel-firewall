@@ -7,45 +7,28 @@ using namespace std;
 #include <string.h>
 #include "test.h"
 
-// stuff from flex that bison needs to know about:
 extern "C" int yylex();
-//extern "C" int yyparse();
 extern "C" FILE *yyin;
 extern int line_num;
 
 struct rules_t;
-rules_t rule;
-//extern rules_t rule;
-std::list<rules_t> rulesList;
+rule_t rule;
+std::list<rule_t> rulesList;
  
 void yyerror(const char *s);
 %}
 
-// Bison fundamentally works by asking flex to get the next token, which it
-// returns as an object of type "yystype".  But tokens could be of any
-// arbitrary data type!  So we deal with that in Bison by defining a C union
-// holding each of the types of tokens that Flex could return, and have Bison
-// use that union instead of "int" for the definition of "yystype":
 %union {
 	int ival;
-	float fval;
 	char *sval;
-	unsigned int ipval;
-	unsigned short portval;
 };
 
-// define the "terminal symbol" token types I'm going to use (in CAPS
-// by convention), and associate each with a field of the union:
 %token <ival> INT
-%token <fval> FLOAT
 %token <sval> STRING
-%token <ipval> IPADDR
-%token <portval> PORT
-%token <rules> RULES
 %token <line_num> ENDL
 %token <sval> ACTION
 %token <sval> PROTO
-%token <sval> SRCIP
+%token <sval> IP
 
 %token SRCPORT
 %token DSTPORT
@@ -55,23 +38,20 @@ void yyerror(const char *s);
 %start all
 
 %%
-// this is the actual grammar that bison will parse, but for right now it's just
-// something silly to echo to the screen what bison gets from flex.  We'll
-// make a real one shortly:
+
 all:
 	all line
 	| line
 	;
 
 line:
-	snazzle endl
-	| snazzle srcport endl
-	| snazzle dstport endl
-	| snazzle srcport dstport endl
+	base endl
+	| base srcport endl
+	| base dstport endl
+	| base srcport dstport endl
 	;
-snazzle:
-	INT ACTION PROTO FROM SRCIP DEST SRCIP {
-	 //cout << "all matched: " << endl; 
+base:
+	INT ACTION PROTO FROM IP DEST IP {
 	 rule.id = $1;
 	 rule.action = strdup($2);
 	 rule.proto = strdup($3);
@@ -81,33 +61,16 @@ snazzle:
 	;
 srcport:
 	SRCPORT INT { 
-		//cout << "srcport: " << $2 << endl; 
 		rule.src_port = $2;
 	}
 	;
 dstport:
 	DSTPORT INT { 
-		//cout << "dstport: " << $2 << endl; 
 		rule.dst_port = $2;
 	}
 	;
 endl:
 	ENDL { 
-		cout << "RID: " << rule.id << " ";
-		cout << "ACTION: " << rule.action << " ";
-		cout << "PROTO: " << rule.proto << " "; 
-		cout << "SRCIP: " << rule.src_ip << " ";
-		cout << "DSTIP: " << rule.dst_ip << " ";
-
-		if(rule.src_port != 0){
-			cout << "SCRPORT: " << rule.src_port << " ";
-		}
-		if(rule.dst_port != 0){
-			cout << "DSTPORT: " << rule.dst_port << " ";
-		}
-
-		cout << endl;
-
 		rulesList.push_back(rule);
 
 		/* Clean up rule */

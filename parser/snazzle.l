@@ -11,7 +11,7 @@ int line_num = 1;
 %%
 [ \t]									;
 [0-9]+									{ yylval.ival = atoi(yytext);   return INT;		}
-([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+|any)	{ yylval.sval = strdup(yytext); return SRCIP;	}
+([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+|any)	{ yylval.sval = strdup(yytext); return IP;		}
 (allow|deny)							{ yylval.sval = strdup(yytext); return ACTION;	}
 (tcp|udp|icmp|ip)						{ yylval.sval = strdup(yytext); return PROTO;	}
 from									{ return FROM;									}

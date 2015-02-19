@@ -1,7 +1,7 @@
 #ifndef _TEST_H_
 #define _TEST_H_
 
-struct rules_t {
+struct rule_t {
 	int id;
 	char *action;
 	char *proto;
@@ -10,7 +10,7 @@ struct rules_t {
 	unsigned short src_port;
 	unsigned short dst_port;
 };
-//rules_t rule;
-extern std::list<rules_t> rulesList;
+
+extern std::list<rule_t> rulesList;
 
 #endif

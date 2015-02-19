@@ -381,9 +381,9 @@ static yyconst flex_int16_t yy_accept[54] =
     {   0,
         0,    0,   13,   11,    1,   10,    2,   11,   11,   11,
        11,   11,   11,   11,    0,    2,    0,    0,    0,    0,
-        0,    0,    4,    0,    0,    7,    0,    0,    0,    6,
-        0,    0,    0,    0,    0,    0,    0,    3,    0,    5,
-        0,    0,    0,    0,    0,    0,    0,    6,    0,    0,
+        0,    0,    5,    0,    0,    7,    0,    0,    0,    3,
+        0,    0,    0,    0,    0,    0,    0,    4,    0,    6,
+        0,    0,    0,    0,    0,    0,    0,    3,    0,    0,
         9,    8,    0
     } ;
 
@@ -784,37 +784,37 @@ YY_RULE_SETUP
 case 3:
 YY_RULE_SETUP
 #line 14 "snazzle.l"
-{ yylval.sval = strdup(yytext); return ACTION;	}
+{ yylval.sval = strdup(yytext); return IP;		}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
 #line 15 "snazzle.l"
-{ yylval.sval = strdup(yytext); return PROTO;	}
+{ yylval.sval = strdup(yytext); return ACTION;	}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
 #line 16 "snazzle.l"
-{ return FROM; }
+{ yylval.sval = strdup(yytext); return PROTO;	}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
 #line 17 "snazzle.l"
-{ yylval.sval = strdup(yytext); return SRCIP;	}
+{ return FROM;									}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
 #line 18 "snazzle.l"
-{ return DEST; }	
+{ return DEST;									}	
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
 #line 19 "snazzle.l"
-{ return SRCPORT;	}
+{ return SRCPORT;								}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
 #line 20 "snazzle.l"
-{ return DSTPORT;	}
+{ return DSTPORT;								}
 	YY_BREAK
 case 10:
 /* rule 10 can match eol */
