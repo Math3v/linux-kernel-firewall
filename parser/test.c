@@ -2,6 +2,7 @@
 #include <list>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 using namespace std;
 
@@ -29,8 +30,10 @@ void parseRules(){
 	// parse through the input until there is no more:
 	do {
 		yyparse();
-	} while (!feof(yyin));
+	} while (!feof(yyin));	
+}
 
+void printRules(){
 	for(std::list<rule_t>::iterator i = rulesList.begin(); i != rulesList.end(); ++i){
 		cout << i->id << " ";
 		cout << i->action << " ";
@@ -43,9 +46,27 @@ void parseRules(){
 	}
 }
 
-int main(){
+int main(int argc, char *argv[]){
 
 	parseRules();
+
+	int opt;
+	while((opt = getopt(argc, argv, "pa:d:f:")) != -1) {
+		switch(opt) {
+			case 'p': /* print rules */
+				printRules();
+				break;
+			case 'a': /* add rule */
+				break;
+			case 'd': /* delete rule rule-id */
+				break;
+			case 'f': /* read rules from file */
+				break;
+			default: /* unmatched argument */
+				fprintf(stderr, "Usage: %s <-a rule | -p | -d rule-id | -f file>\n", 
+					argv[0]);
+		}
+	}
 
 	return 0;
 }
