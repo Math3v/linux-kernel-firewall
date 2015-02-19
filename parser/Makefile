@@ -1,2 +1,2 @@
 all:
-	g++ snazzle.tab.c lex.yy.c test.c -lfl -o firewall
+	g++ firewall_parser.tab.c lex.yy.c firewall.c -lfl -o firewall

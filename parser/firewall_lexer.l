@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "snazzle.tab.h"
+#include "firewall_parser.tab.h"
 int line_num = 1;
 %}
 %%

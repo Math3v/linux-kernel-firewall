@@ -30,8 +30,8 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-#ifndef YY_YY_SNAZZLE_TAB_H_INCLUDED
-# define YY_YY_SNAZZLE_TAB_H_INCLUDED
+#ifndef YY_YY_FIREWALL_PARSER_TAB_H_INCLUDED
+# define YY_YY_FIREWALL_PARSER_TAB_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -47,15 +47,14 @@ extern int yydebug;
   {
     INT = 258,
     STRING = 259,
-    PORT = 260,
-    ENDL = 261,
-    ACTION = 262,
-    PROTO = 263,
-    IP = 264,
-    SRCPORT = 265,
-    DSTPORT = 266,
-    FROM = 267,
-    DEST = 268
+    ENDL = 260,
+    ACTION = 261,
+    PROTO = 262,
+    IP = 263,
+    SRCPORT = 264,
+    DSTPORT = 265,
+    FROM = 266,
+    DEST = 267
   };
 #endif
 
@@ -64,12 +63,12 @@ extern int yydebug;
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 21 "snazzle.y" /* yacc.c:1909  */
+#line 21 "firewall_parser.y" /* yacc.c:1909  */
 
 	int ival;
 	char *sval;
 
-#line 73 "snazzle.tab.h" /* yacc.c:1909  */
+#line 72 "firewall_parser.tab.h" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
@@ -80,4 +79,4 @@ extern YYSTYPE yylval;
 
 int yyparse (void);
 
-#endif /* !YY_YY_SNAZZLE_TAB_H_INCLUDED  */
+#endif /* !YY_YY_FIREWALL_PARSER_TAB_H_INCLUDED  */

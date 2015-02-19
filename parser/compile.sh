@@ -1,9 +1,8 @@
 #!/bin/bash
 
-rm snazzle.tab.c
+rm firewall_parser.tab.c
+rm firewall_parser.tab.h
 rm lex.yy.c
 
-bison -d snazzle.y
-flex snazzle.l
-#g++ snazzle.tab.c lex.yy.c -lfl -o snazzle
-#g++ snazzle.tab.c lex.yy.c test.c -lfl -o snazzle
+bison -d firewall_parser.y
+flex firewall_lexer.l

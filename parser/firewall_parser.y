@@ -5,7 +5,7 @@
 using namespace std;
 
 #include <string.h>
-#include "test.h"
+#include "firewall.h"
 
 extern "C" int yylex();
 extern "C" FILE *yyin;

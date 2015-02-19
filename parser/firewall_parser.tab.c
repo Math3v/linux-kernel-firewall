@@ -62,7 +62,7 @@
 
 
 /* Copy the first part of user declarations.  */
-#line 1 "snazzle.y" /* yacc.c:339  */
+#line 1 "firewall_parser.y" /* yacc.c:339  */
 
 #include <cstdio>
 #include <iostream>
@@ -70,7 +70,7 @@
 using namespace std;
 
 #include <string.h>
-#include "test.h"
+#include "firewall.h"
 
 extern "C" int yylex();
 extern "C" FILE *yyin;
@@ -82,7 +82,7 @@ std::list<rule_t> rulesList;
  
 void yyerror(const char *s);
 
-#line 86 "snazzle.tab.c" /* yacc.c:339  */
+#line 86 "firewall_parser.tab.c" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -101,9 +101,9 @@ void yyerror(const char *s);
 #endif
 
 /* In a future release of Bison, this section will be replaced
-   by #include "snazzle.tab.h".  */
-#ifndef YY_YY_SNAZZLE_TAB_H_INCLUDED
-# define YY_YY_SNAZZLE_TAB_H_INCLUDED
+   by #include "firewall_parser.tab.h".  */
+#ifndef YY_YY_FIREWALL_PARSER_TAB_H_INCLUDED
+# define YY_YY_FIREWALL_PARSER_TAB_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -119,15 +119,14 @@ extern int yydebug;
   {
     INT = 258,
     STRING = 259,
-    PORT = 260,
-    ENDL = 261,
-    ACTION = 262,
-    PROTO = 263,
-    IP = 264,
-    SRCPORT = 265,
-    DSTPORT = 266,
-    FROM = 267,
-    DEST = 268
+    ENDL = 260,
+    ACTION = 261,
+    PROTO = 262,
+    IP = 263,
+    SRCPORT = 264,
+    DSTPORT = 265,
+    FROM = 266,
+    DEST = 267
   };
 #endif
 
@@ -136,12 +135,12 @@ extern int yydebug;
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 21 "snazzle.y" /* yacc.c:355  */
+#line 21 "firewall_parser.y" /* yacc.c:355  */
 
 	int ival;
 	char *sval;
 
-#line 145 "snazzle.tab.c" /* yacc.c:355  */
+#line 144 "firewall_parser.tab.c" /* yacc.c:355  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
@@ -152,11 +151,11 @@ extern YYSTYPE yylval;
 
 int yyparse (void);
 
-#endif /* !YY_YY_SNAZZLE_TAB_H_INCLUDED  */
+#endif /* !YY_YY_FIREWALL_PARSER_TAB_H_INCLUDED  */
 
 /* Copy the second part of user declarations.  */
 
-#line 160 "snazzle.tab.c" /* yacc.c:358  */
+#line 159 "firewall_parser.tab.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -398,10 +397,10 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  6
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   24
+#define YYLAST   25
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  14
+#define YYNTOKENS  13
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  7
 /* YYNRULES -- Number of rules.  */
@@ -412,7 +411,7 @@ union yyalloc
 /* YYTRANSLATE[YYX] -- Symbol number corresponding to YYX as returned
    by yylex, with out-of-bounds checking.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   268
+#define YYMAXUTOK   267
 
 #define YYTRANSLATE(YYX)                                                \
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -447,15 +446,15 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-       5,     6,     7,     8,     9,    10,    11,    12,    13
+       5,     6,     7,     8,     9,    10,    11,    12
 };
 
 #if YYDEBUG
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    44,    44,    45,    49,    50,    51,    52,    55,    64,
-      69,    74
+       0,    43,    43,    44,    48,    49,    50,    51,    54,    63,
+      68,    73
 };
 #endif
 
@@ -464,9 +463,9 @@ static const yytype_uint8 yyrline[] =
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "$end", "error", "$undefined", "INT", "STRING", "PORT", "ENDL",
-  "ACTION", "PROTO", "IP", "SRCPORT", "DSTPORT", "FROM", "DEST", "$accept",
-  "all", "line", "base", "srcport", "dstport", "endl", YY_NULLPTR
+  "$end", "error", "$undefined", "INT", "STRING", "ENDL", "ACTION",
+  "PROTO", "IP", "SRCPORT", "DSTPORT", "FROM", "DEST", "$accept", "all",
+  "line", "base", "srcport", "dstport", "endl", YY_NULLPTR
 };
 #endif
 
@@ -476,7 +475,7 @@ static const char *const yytname[] =
 static const yytype_uint16 yytoknum[] =
 {
        0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
-     265,   266,   267,   268
+     265,   266,   267
 };
 # endif
 
@@ -494,9 +493,9 @@ static const yytype_uint16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-       7,     4,     2,   -12,    -3,     5,   -12,   -12,   -12,     9,
-      11,    -2,    10,   -12,     3,   -12,   -12,    10,   -12,   -12,
-       8,   -12,     6,    12,   -12
+       7,     5,     2,   -12,    -2,     6,   -12,   -12,   -12,     9,
+      11,    -1,    10,   -12,     8,   -12,   -12,    10,   -12,   -12,
+      12,   -12,     4,    13,   -12
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -512,7 +511,7 @@ static const yytype_uint8 yydefact[] =
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -12,   -12,    16,   -12,   -12,    13,   -11
+     -12,   -12,    15,   -12,   -12,    14,   -11
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
@@ -527,31 +526,31 @@ static const yytype_int8 yydefgoto[] =
 static const yytype_uint8 yytable[] =
 {
       18,    19,     6,     8,     8,     1,    21,     9,    10,    10,
-       1,     5,    15,    14,    16,    20,     8,    22,     7,    23,
-       0,    24,     0,     0,    17
+       1,     5,    15,    14,    16,     8,    23,     7,     0,    20,
+      22,    24,     0,     0,     0,    17
 };
 
 static const yytype_int8 yycheck[] =
 {
-      11,    12,     0,     6,     6,     3,    17,    10,    11,    11,
-       3,     7,     3,     8,     3,    12,     6,     9,     2,    13,
-      -1,     9,    -1,    -1,    11
+      11,    12,     0,     5,     5,     3,    17,     9,    10,    10,
+       3,     6,     3,     7,     3,     5,    12,     2,    -1,    11,
+       8,     8,    -1,    -1,    -1,    11
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,     3,    15,    16,    17,     7,     0,    16,     6,    10,
-      11,    18,    19,    20,     8,     3,     3,    19,    20,    20,
-      12,    20,     9,    13,     9
+       0,     3,    14,    15,    16,     6,     0,    15,     5,     9,
+      10,    17,    18,    19,     7,     3,     3,    18,    19,    19,
+      11,    19,     8,    12,     8
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    14,    15,    15,    16,    16,    16,    16,    17,    18,
-      19,    20
+       0,    13,    14,    14,    15,    15,    15,    15,    16,    17,
+      18,    19
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
@@ -1235,7 +1234,7 @@ yyreduce:
   switch (yyn)
     {
         case 8:
-#line 55 "snazzle.y" /* yacc.c:1646  */
+#line 54 "firewall_parser.y" /* yacc.c:1646  */
     {
 	 rule.id = (yyvsp[-6].ival);
 	 rule.action = strdup((yyvsp[-5].sval));
@@ -1243,27 +1242,27 @@ yyreduce:
 	 rule.src_ip = strdup((yyvsp[-2].sval));
 	 rule.dst_ip = strdup((yyvsp[0].sval));
 	 }
-#line 1247 "snazzle.tab.c" /* yacc.c:1646  */
+#line 1246 "firewall_parser.tab.c" /* yacc.c:1646  */
     break;
 
   case 9:
-#line 64 "snazzle.y" /* yacc.c:1646  */
+#line 63 "firewall_parser.y" /* yacc.c:1646  */
     { 
 		rule.src_port = (yyvsp[0].ival);
 	}
-#line 1255 "snazzle.tab.c" /* yacc.c:1646  */
+#line 1254 "firewall_parser.tab.c" /* yacc.c:1646  */
     break;
 
   case 10:
-#line 69 "snazzle.y" /* yacc.c:1646  */
+#line 68 "firewall_parser.y" /* yacc.c:1646  */
     { 
 		rule.dst_port = (yyvsp[0].ival);
 	}
-#line 1263 "snazzle.tab.c" /* yacc.c:1646  */
+#line 1262 "firewall_parser.tab.c" /* yacc.c:1646  */
     break;
 
   case 11:
-#line 74 "snazzle.y" /* yacc.c:1646  */
+#line 73 "firewall_parser.y" /* yacc.c:1646  */
     { 
 		rulesList.push_back(rule);
 
@@ -1276,11 +1275,11 @@ yyreduce:
 		rule.src_port = 0;
 		rule.dst_port = 0;
 	}
-#line 1280 "snazzle.tab.c" /* yacc.c:1646  */
+#line 1279 "firewall_parser.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1284 "snazzle.tab.c" /* yacc.c:1646  */
+#line 1283 "firewall_parser.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1508,4 +1507,5 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 87 "snazzle.y" /* yacc.c:1906  */
+#line 86 "firewall_parser.y" /* yacc.c:1906  */
+

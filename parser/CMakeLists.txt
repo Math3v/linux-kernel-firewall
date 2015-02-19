@@ -1,5 +1,0 @@
-cmake_minimum_required (VERSION 2.6)
-project(firewall)
-SET_SOURCE_FILES_PROPERTIES(snazzle.tab.c lex.yy.c test.c PROPERTIES LANGUAGE CXX)
-add_executable(firewall snazzle.tab.c lex.yy.c test.c)
-target_link_libraries(firewall fl)

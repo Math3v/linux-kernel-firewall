@@ -490,14 +490,14 @@ int yy_flex_debug = 0;
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
-#line 1 "snazzle.l"
-#line 3 "snazzle.l"
+#line 1 "firewall_lexer.l"
+#line 3 "firewall_lexer.l"
 #define YY_DECL extern "C" int yylex()
 
 #include <stdio.h>
 #include <string.h>
 
-#include "snazzle.tab.h"
+#include "firewall_parser.tab.h"
 int line_num = 1;
 #line 503 "lex.yy.c"
 
@@ -686,7 +686,7 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 11 "snazzle.l"
+#line 11 "firewall_lexer.l"
 
 #line 692 "lex.yy.c"
 
@@ -773,63 +773,63 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 12 "snazzle.l"
+#line 12 "firewall_lexer.l"
 ;
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 13 "snazzle.l"
+#line 13 "firewall_lexer.l"
 { yylval.ival = atoi(yytext);   return INT;		}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 14 "snazzle.l"
+#line 14 "firewall_lexer.l"
 { yylval.sval = strdup(yytext); return IP;		}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 15 "snazzle.l"
+#line 15 "firewall_lexer.l"
 { yylval.sval = strdup(yytext); return ACTION;	}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 16 "snazzle.l"
+#line 16 "firewall_lexer.l"
 { yylval.sval = strdup(yytext); return PROTO;	}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 17 "snazzle.l"
+#line 17 "firewall_lexer.l"
 { return FROM;									}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 18 "snazzle.l"
+#line 18 "firewall_lexer.l"
 { return DEST;									}	
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 19 "snazzle.l"
+#line 19 "firewall_lexer.l"
 { return SRCPORT;								}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 20 "snazzle.l"
+#line 20 "firewall_lexer.l"
 { return DSTPORT;								}
 	YY_BREAK
 case 10:
 /* rule 10 can match eol */
 YY_RULE_SETUP
-#line 21 "snazzle.l"
+#line 21 "firewall_lexer.l"
 { ++line_num; return ENDL; 						}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 22 "snazzle.l"
+#line 22 "firewall_lexer.l"
 ;
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 23 "snazzle.l"
+#line 23 "firewall_lexer.l"
 ECHO;
 	YY_BREAK
 #line 836 "lex.yy.c"
@@ -1830,6 +1830,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 23 "snazzle.l"
+#line 23 "firewall_lexer.l"
+
 
 

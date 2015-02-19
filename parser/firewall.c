@@ -6,8 +6,8 @@
 
 using namespace std;
 
-#include "snazzle.tab.h"
-#include "test.h"
+#include "firewall_parser.tab.h"
+#include "firewall.h"
 
 extern "C" FILE *yyin;
 extern int line_num;
@@ -19,7 +19,7 @@ void yyerror(const char *s) {
 }
 
 void parseRules(){
-	FILE *myfile = fopen("../a.snazzle.file", "r");
+	FILE *myfile = fopen("rules.in", "r");
 	if (!myfile) {
 		cout << "I can't open a.snazzle.file!" << endl;
 		exit(-1);
