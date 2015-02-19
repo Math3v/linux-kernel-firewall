@@ -70,29 +70,22 @@
 using namespace std;
 
 #include <string.h>
+#include "test.h"
 
 // stuff from flex that bison needs to know about:
 extern "C" int yylex();
-extern "C" int yyparse();
+//extern "C" int yyparse();
 extern "C" FILE *yyin;
 extern int line_num;
 
-struct rules_t {
-	int id;
-	char *action;
-	char *proto;
-	char *src_ip;
-	char *dst_ip;
-	unsigned short src_port;
-	unsigned short dst_port;
-};
-
-std::list<rules_t> rulesList;
+struct rules_t;
 rules_t rule;
+//extern rules_t rule;
+std::list<rules_t> rulesList;
  
 void yyerror(const char *s);
 
-#line 96 "snazzle.tab.c" /* yacc.c:339  */
+#line 89 "snazzle.tab.c" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -149,7 +142,7 @@ extern int yydebug;
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 36 "snazzle.y" /* yacc.c:355  */
+#line 29 "snazzle.y" /* yacc.c:355  */
 
 	int ival;
 	float fval;
@@ -157,7 +150,7 @@ union YYSTYPE
 	unsigned int ipval;
 	unsigned short portval;
 
-#line 161 "snazzle.tab.c" /* yacc.c:355  */
+#line 154 "snazzle.tab.c" /* yacc.c:355  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
@@ -172,7 +165,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 176 "snazzle.tab.c" /* yacc.c:358  */
+#line 169 "snazzle.tab.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -471,8 +464,8 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    69,    69,    70,    74,    75,    76,    77,    80,    90,
-      96,   102
+       0,    62,    62,    63,    67,    68,    69,    70,    73,    83,
+      89,    95
 };
 #endif
 
@@ -1253,7 +1246,7 @@ yyreduce:
   switch (yyn)
     {
         case 8:
-#line 80 "snazzle.y" /* yacc.c:1646  */
+#line 73 "snazzle.y" /* yacc.c:1646  */
     {
 	 //cout << "all matched: " << endl; 
 	 rule.id = (yyvsp[-6].ival);
@@ -1262,29 +1255,29 @@ yyreduce:
 	 rule.src_ip = strdup((yyvsp[-2].sval));
 	 rule.dst_ip = strdup((yyvsp[0].sval));
 	 }
-#line 1266 "snazzle.tab.c" /* yacc.c:1646  */
+#line 1259 "snazzle.tab.c" /* yacc.c:1646  */
     break;
 
   case 9:
-#line 90 "snazzle.y" /* yacc.c:1646  */
+#line 83 "snazzle.y" /* yacc.c:1646  */
     { 
 		//cout << "srcport: " << $2 << endl; 
 		rule.src_port = (yyvsp[0].ival);
 	}
-#line 1275 "snazzle.tab.c" /* yacc.c:1646  */
+#line 1268 "snazzle.tab.c" /* yacc.c:1646  */
     break;
 
   case 10:
-#line 96 "snazzle.y" /* yacc.c:1646  */
+#line 89 "snazzle.y" /* yacc.c:1646  */
     { 
 		//cout << "dstport: " << $2 << endl; 
 		rule.dst_port = (yyvsp[0].ival);
 	}
-#line 1284 "snazzle.tab.c" /* yacc.c:1646  */
+#line 1277 "snazzle.tab.c" /* yacc.c:1646  */
     break;
 
   case 11:
-#line 102 "snazzle.y" /* yacc.c:1646  */
+#line 95 "snazzle.y" /* yacc.c:1646  */
     { 
 		cout << "RID: " << rule.id << " ";
 		cout << "ACTION: " << rule.action << " ";
@@ -1312,11 +1305,11 @@ yyreduce:
 		rule.src_port = 0;
 		rule.dst_port = 0;
 	}
-#line 1316 "snazzle.tab.c" /* yacc.c:1646  */
+#line 1309 "snazzle.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1320 "snazzle.tab.c" /* yacc.c:1646  */
+#line 1313 "snazzle.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1544,28 +1537,4 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 130 "snazzle.y" /* yacc.c:1906  */
-
-main() {
-       // open a file handle to a particular file:
-       FILE *myfile = fopen("a.snazzle.file", "r");
-       // make sure it is valid:
-       if (!myfile) {
-               cout << "I can't open a.snazzle.file!" << endl;
-               return -1;
-       }
-       // set flex to read from it instead of defaultingTDIN:
-       yyin = myfile;
-       
-       // parse through the input until there is no more:
-       do {
-               yyparse();
-       } while (!feof(yyin));
-       
-}
-
-void yyerror(const char *s) {
-       cout << "EEK, parse error!  Message: " << s << " on line: " << line_num;
-       // might as well halt now:
-       exit(-1);
-}
+#line 123 "snazzle.y" /* yacc.c:1906  */

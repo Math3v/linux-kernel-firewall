@@ -5,25 +5,18 @@
 using namespace std;
 
 #include <string.h>
+#include "test.h"
 
 // stuff from flex that bison needs to know about:
 extern "C" int yylex();
-extern "C" int yyparse();
+//extern "C" int yyparse();
 extern "C" FILE *yyin;
 extern int line_num;
 
-struct rules_t {
-	int id;
-	char *action;
-	char *proto;
-	char *src_ip;
-	char *dst_ip;
-	unsigned short src_port;
-	unsigned short dst_port;
-};
-
-std::list<rules_t> rulesList;
+struct rules_t;
 rules_t rule;
+//extern rules_t rule;
+std::list<rules_t> rulesList;
  
 void yyerror(const char *s);
 %}
@@ -128,26 +121,3 @@ endl:
 	}
 	;
 %%
-main() {
-       // open a file handle to a particular file:
-       FILE *myfile = fopen("a.snazzle.file", "r");
-       // make sure it is valid:
-       if (!myfile) {
-               cout << "I can't open a.snazzle.file!" << endl;
-               return -1;
-       }
-       // set flex to read from it instead of defaultingTDIN:
-       yyin = myfile;
-       
-       // parse through the input until there is no more:
-       do {
-               yyparse();
-       } while (!feof(yyin));
-       
-}
-
-void yyerror(const char *s) {
-       cout << "EEK, parse error!  Message: " << s << " on line: " << line_num;
-       // might as well halt now:
-       exit(-1);
-}
