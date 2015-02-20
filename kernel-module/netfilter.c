@@ -10,6 +10,7 @@
 #include <linux/netfilter.h>
 #include <linux/netfilter_ipv4.h>
 #include <linux/plist.h>
+#include <linux/hashtable.h>
  
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("linux-simple-firewall");
@@ -19,13 +20,15 @@ MODULE_AUTHOR("Liu Feipeng/roman10");
 static struct nf_hook_ops nfho;
 static struct nf_hook_ops nfho_out;
 
+static LIST_HEAD(g_list);
+DEFINE_HASHTABLE(g_hash, 4);
+
 struct rule_t {
   int prio;
   int number;
-  struct plist_head *plist;
-}
-
-static LIST_HEAD(plist);
+  struct list_head plist;
+  struct hlist_node hlist;
+};
  
 unsigned int port_str_to_int(char *port_str) {
     unsigned int port = 0;    
@@ -198,44 +201,38 @@ unsigned int hook_func_in(unsigned int hooknum, struct sk_buff *skb,
  
 }
 
-void plist_test(){
-    struct rule_t rule;
-    rule.prio = 100;
-    rule.number = 24;
-
-    struct rule_t *r;
-
-    INIT_LIST_HEAD(rule.plist);
-    list_add(rule.plist, plist);
-
-    plist_for_each(r, plist){
-      printk("hello from list %d\n", r->number);
-    }
-}
- 
 /* Initialization routine */
 int init_module() {
     printk("initialize kernel module\n");
+    /* create a list head */
+    struct rule_t *rulesList, *a;
+    rulesList = kmalloc(sizeof(*rulesList), GFP_KERNEL);
+    rulesList->number = 24;
+
+    INIT_LIST_HEAD(&rulesList->plist);
+    list_add(&rulesList->plist, &g_list);
+
+    list_for_each_entry(a, &g_list, plist) {
+      printk("number %d\n", a->number);
+    }
  
     //INIT_LIST_HEAD(&(policy_list.list));
  
     /* Fill in the hook structure for incoming packet hook*/
-    nfho.hook = hook_func_in;
+    /*nfho.hook = hook_func_in;
     nfho.hooknum = NF_INET_LOCAL_IN;
     nfho.pf = PF_INET;
-    nfho.priority = NF_IP_PRI_FIRST;
+    nfho.priority = NF_IP_PRI_FIRST;*/
  
     //nf_register_hook(&nfho);         // Register the hook
  
     /* Fill in the hook structure for outgoing packet hook*/
-    nfho_out.hook = hook_func_out;
+    /*nfho_out.hook = hook_func_out;
     nfho_out.hooknum = NF_INET_LOCAL_OUT; 
     nfho_out.pf = PF_INET;
-    nfho_out.priority = NF_IP_PRI_FIRST;
+    nfho_out.priority = NF_IP_PRI_FIRST;*/
  
     //nf_register_hook(&nfho_out);    // Register the hook
- 
-    plist_test();
 
     return 0;
  
@@ -245,9 +242,15 @@ int init_module() {
  
 /* Cleanup routine */
 void cleanup_module() {
-    nf_unregister_hook(&nfho);
-    nf_unregister_hook(&nfho_out);
+    //nf_unregister_hook(&nfho);
+    //nf_unregister_hook(&nfho_out);
  
+    struct rule_t *arule, *tmp;
+    list_for_each_entry_safe(arule, tmp, &g_list, plist){
+      printk("freeing number %d\n", arule->number);
+      list_del(&arule->plist);
+      kfree(arule);
+    }
     printk("kernel module unloaded.\n");
  
 }
