@@ -5,8 +5,13 @@
 #include <linux/proc_fs.h>
 #include <asm/uaccess.h>	/* for copy_from_user */
 
-#define PROCF_MAX_SIZE 1024
-#define PROCF_NAME "linux-kernel-firewall"
+#include <linux/fs.h>		// for basic filesystem
+#include <linux/proc_fs.h>	// for the proc filesystem
+#include <linux/seq_file.h>	// for sequence files
+#include <linux/jiffies.h>	// for jiffies
+
+#define PROCFS_MAX_SIZE 1024
+#define PROCFS_NAME "linux-kernel-firewall"
 
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("linux-simple-firewall");
@@ -14,9 +19,9 @@ MODULE_AUTHOR("Liu Feipeng/roman10");
 
 DEFINE_HASHTABLE(hashmap, 4);
 
-static struct proc_dir_entry *mf_proc_file;
-unsigned long procf_buffer_pos;
-char *procf_buffer;
+static struct proc_dir_entry *procfs;
+static char procfs_buffer[PROCFS_MAX_SIZE];
+static unsigned long procfs_buffer_size = 0;
 
 struct user_hash {
 	struct hlist_node hash;
@@ -29,57 +34,63 @@ struct user_hash {
 	unsigned short dst_port;
 };
 
-int procf_write(struct file *file, const char *buffer, 
-	unsigned long count, void *data)
+int procfile_write(struct file *file, const char *buffer, unsigned long count,
+		   void *data)
 {
-   int i, j;
-   struct mf_rule_desp *rule_desp;
-   char c;
- 
-   printk(KERN_INFO "procf_write is called.\n");
- 
-   /*read the write content into the storage buffer*/
- 
-   procf_buffer_pos = 0;
-   printk(KERN_INFO "pos: %ld; count: %ld\n", procf_buffer_pos, count);
-   if (procf_buffer_pos + count > PROCF_MAX_SIZE) {
- 
-       count = PROCF_MAX_SIZE-procf_buffer_pos;
- 
-   } 
-   if (copy_from_user(procf_buffer+procf_buffer_pos, buffer, count)) {
- 
-       return -EFAULT;
- 
-   }
+	unsigned int cnt = 0;
+	/* get buffer size */
+	procfs_buffer_size = count;
+	if (procfs_buffer_size > PROCFS_MAX_SIZE ) {
+		procfs_buffer_size = PROCFS_MAX_SIZE;
+	}
+	
+	/* write data to the buffer */
+	if ( copy_from_user(procfs_buffer, buffer, procfs_buffer_size) ) {
+		return -EFAULT;
+	}
 
-   printk("Received: ");
-   while((c = procf_buffer[procf_buffer_pos]) != '\n') {
-   		printk("%c", c);
-   }
+	printk("Received: ");
+	for(; cnt < procfs_buffer_size; ++cnt) {
+		printk("%c", buffer[cnt]);
+	}
+	
+	return procfs_buffer_size;
 }
 
 int init_module(){
 	struct user_hash *node;
 	struct user_hash *rule = kmalloc(sizeof(struct user_hash), GFP_KERNEL);
-	unsigned int bkt = 0;
-	unsigned int cnt = 0;
-	struct hlist_node empty = {.next = NULL, .pprev = NULL};
+	unsigned int bkt = 0, cnt = 0;
+	struct hlist_node empty = {.next = NULL, .pprev = NULL };
 
-	procf_buffer = (char *) vmalloc(PROCF_MAX_SIZE);
-	mf_proc_file = create_proc_entry(PROCF_NAME, 0644, NULL);
-	if(mf_proc_file == NULL) {
-		printk("Could not initialize /proc/%s\n", PROCF_NAME);
+	printk("firewall init\n");
+
+	static const struct file_operations proc_file_fops = {
+	 .owner	= THIS_MODULE,
+	 //.open	= procfs_open,
+	 //.read	= seq_read,
+	 //.llseek	= seq_lseek,
+	 //.release	= single_release,
+	 	.write = procfile_write
+	};
+
+	procfs = proc_create(PROCFS_NAME, 0, NULL, &proc_file_fops);
+	if (procfs == NULL) {
+		//remove_proc_entry(PROCFS_NAME, &proc_root);
+		printk("Error: Could not initialize /proc/%s\n",
+			PROCFS_NAME);
 		return -ENOMEM;
 	}
 
-	//mf_proc_file->read_proc = procf_read;
- 
-    mf_proc_file->write_proc = procf_write;
- 
-    printk(KERN_INFO "/proc/%s is created\n", PROCF_NAME);
+	//Our_Proc_File->read_proc  = procfile_read;
+	/*procfs->write_proc = procfile_write;
+	procfs->owner 	  = THIS_MODULE;
+	procfs->mode 	  = S_IFREG | S_IRUGO;
+	procfs->uid 	  = 0;
+	procfs->gid 	  = 0;
+	procfs->size 	  = 37;*/
 
-	printk("firewall init\n");
+	printk(KERN_INFO "/proc/%s created\n", PROCFS_NAME);
 
 	rule->id = 10;
 	rule->action = 'a';
@@ -144,5 +155,7 @@ int init_module(){
 
 
 void cleanup_module(){
+	remove_proc_entry(PROCFS_NAME, NULL);
 	printk("firewall cleanup\n");
+
 }
