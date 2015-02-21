@@ -1,7 +1,6 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/proc_fs.h>
-#include <linux/list.h>
 #include <asm/uaccess.h>
 #include <linux/udp.h>
 #include <linux/tcp.h>
@@ -9,8 +8,8 @@
 #include <linux/ip.h>
 #include <linux/netfilter.h>
 #include <linux/netfilter_ipv4.h>
-#include <linux/plist.h>
 #include <linux/hashtable.h>
+#include <linux/slab.h>
  
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("linux-simple-firewall");
@@ -20,14 +19,11 @@ MODULE_AUTHOR("Liu Feipeng/roman10");
 static struct nf_hook_ops nfho;
 static struct nf_hook_ops nfho_out;
 
-static LIST_HEAD(g_list);
-DEFINE_HASHTABLE(g_hash, 4);
+DEFINE_HASHTABLE(hashmap, 4);
 
 struct rule_t {
-  int prio;
-  int number;
-  struct list_head plist;
-  struct hlist_node hlist;
+  struct hlist_node hash;
+  int data;
 };
  
 unsigned int port_str_to_int(char *port_str) {
@@ -203,18 +199,16 @@ unsigned int hook_func_in(unsigned int hooknum, struct sk_buff *skb,
 
 /* Initialization routine */
 int init_module() {
-    printk("initialize kernel module\n");
-    /* create a list head */
-    struct rule_t *rulesList, *a;
-    rulesList = kmalloc(sizeof(*rulesList), GFP_KERNEL);
-    rulesList->number = 24;
+    struct rule_t *node;
+    unsigned int bkt;
+    node = kmalloc(sizeof(struct rule_t), GFP_KERNEL);
 
-    INIT_LIST_HEAD(&rulesList->plist);
-    list_add(&rulesList->plist, &g_list);
+    node->data = 5;
+    hash_add(hashmap, &node->hash, node->data);
 
-    list_for_each_entry(a, &g_list, plist) {
-      printk("number %d\n", a->number);
-    }
+    hash_for_each_entry(hashmap, bkt, node, hash) {
+        printk("number=%d in bucket=%d\n", node->DEFINE_HASHTABLE, bkt);
+    };
  
     //INIT_LIST_HEAD(&(policy_list.list));
  
@@ -245,12 +239,6 @@ void cleanup_module() {
     //nf_unregister_hook(&nfho);
     //nf_unregister_hook(&nfho_out);
  
-    struct rule_t *arule, *tmp;
-    list_for_each_entry_safe(arule, tmp, &g_list, plist){
-      printk("freeing number %d\n", arule->number);
-      list_del(&arule->plist);
-      kfree(arule);
-    }
     printk("kernel module unloaded.\n");
  
 }

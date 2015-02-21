@@ -1,4 +1,4 @@
-obj-m += netfilter.o
+obj-m += hashtable.o
 all:
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
 clean:
