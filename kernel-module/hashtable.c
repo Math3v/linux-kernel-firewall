@@ -12,6 +12,8 @@
 
 #include <linux/string.h>
 
+#define str(x) #x
+
 #define PROCFS_MAX_SIZE 1024
 #define PROCFS_NAME "linux-kernel-firewall"
 
@@ -25,11 +27,16 @@ static struct proc_dir_entry *procfs;
 static char procfs_buffer[PROCFS_MAX_SIZE];
 static unsigned long procfs_buffer_size = 0;
 
+/*enum proto_t{
+	tcp, udp, icmp, ip
+};*/
+
 struct user_hash {
 	struct hlist_node hash;
 	unsigned int id;
 	unsigned char action; /* d-deny a-allow */
-	unsigned char proto; /* t-tcp u-udp m-icmp i-ip */
+	unsigned int proto; /* 1000-tcp 2500-udp 3800-icmp 4200-ip */
+	//enum proto_t proto;
 	unsigned int src_ip;
 	unsigned int dst_ip;
 	unsigned short src_port;
@@ -82,15 +89,15 @@ int procfile_write(struct file *file, const char *buffer, unsigned long count,
 				}
 				else if(token_cnt == 2) {
 					if(strcmp(token, "tcp") == 0)
-						node->proto = 't';
+						node->proto = 1000;
 					else if(strcmp(token, "udp") == 0){
-						node->proto = 'u';
+						node->proto = 2500;
 					}
 					else if(strcmp(token, "icmp") == 0){
-						node->proto = 'm';
+						node->proto = 3800;
 					}
 					else if(strcmp(token, "ip") == 0){
-						node->proto = 'i';
+						node->proto = 4200;
 					}
 					else {
 						printk(KERN_ERR "Parsing failed on proto %s\n", token);
@@ -101,7 +108,7 @@ int procfile_write(struct file *file, const char *buffer, unsigned long count,
 				token = strsep(&running, delim);
 				++token_cnt;
 			}
-			printk("Adding node %c %c\n", node->action, node->proto);
+			printk("Adding node %c %d\n", node->action, node->proto);
 			hash_add_rcu(hashmap, &node->hash, node->proto);
 		}
 	}
@@ -130,7 +137,7 @@ int init_module(){
 	printk("firewall init\n");
 	printk(KERN_INFO "/proc/%s created\n", PROCFS_NAME);
 
-	rule->id = 10;
+	/*rule->id = 10;
 	rule->action = 'a';
 	rule->proto = 't';
 	rule->src_ip = 240;
@@ -186,7 +193,7 @@ int init_module(){
 	hash_for_each_possible_rcu(hashmap, node, hash, 'u') {
 		printk("node %d proto %c\n", node->id, node->proto);
 	}
-	printk("end for each possible\n");
+	printk("end for each possible\n");*/
 
 	return 0;
 }
@@ -196,15 +203,15 @@ void cleanup_module(){
 	struct user_hash *node; 
 	unsigned int bkt = 0;
 	hash_for_each_rcu(hashmap, bkt, node, hash){
-		printk("node %d proto %c in bucket %d\n", node->id, node->proto, bkt);
+		printk("node %d proto %d in bucket %d\n", node->id, node->proto, bkt);
 	}
 	printk("possible i\n");
-	hash_for_each_possible_rcu(hashmap, node, hash, 'i'){
-		printk("node %d proto %c in bucket %d\n", node->id, node->proto, bkt);
+	hash_for_each_possible_rcu(hashmap, node, hash, 3800){
+		printk("node %d proto %d in bucket %d\n", node->id, node->proto, bkt);
 	}
 	printk("possible m\n");
-	hash_for_each_possible_rcu(hashmap, node, hash, 'm'){
-		printk("node %d proto %c in bucket %d\n", node->id, node->proto, bkt);
+	hash_for_each_possible_rcu(hashmap, node, hash, 4200){
+		printk("node %d proto %d in bucket %d\n", node->id, node->proto, bkt);
 	}
 	remove_proc_entry(PROCFS_NAME, NULL);
 	printk("firewall cleanup\n");
