@@ -10,6 +10,8 @@
 #include <linux/seq_file.h>	// for sequence files
 #include <linux/jiffies.h>	// for jiffies
 
+#include <linux/string.h>
+
 #define PROCFS_MAX_SIZE 1024
 #define PROCFS_NAME "linux-kernel-firewall"
 
@@ -37,7 +39,11 @@ struct user_hash {
 int procfile_write(struct file *file, const char *buffer, unsigned long count,
 		   void *data)
 {
-	unsigned int cnt = 0;
+	unsigned int cnt = 0, token_cnt = 0;
+	//char line[50];
+	char *token, *running, *line = kmalloc(50, GFP_KERNEL);
+	const char delim[2] = " ";
+	struct user_hash *node;
 	/* get buffer size */
 	procfs_buffer_size = count;
 	if (procfs_buffer_size > PROCFS_MAX_SIZE ) {
@@ -52,6 +58,52 @@ int procfile_write(struct file *file, const char *buffer, unsigned long count,
 	printk("Received: ");
 	for(; cnt < procfs_buffer_size; ++cnt) {
 		printk("%c", buffer[cnt]);
+		line[cnt] = buffer[cnt];
+		if(buffer[cnt] == '\n') {
+			token_cnt = 0;
+			line[cnt] = '\0';
+			node = kmalloc(sizeof(struct user_hash), GFP_KERNEL);
+			running = kmalloc(strlen(line), GFP_KERNEL);
+			memcpy(running, line, strlen(line));
+			token = strsep(&running, delim);
+			while(token != NULL) {
+				if(token_cnt == 0) {
+					kstrtouint(token, 10, &node->id);
+				}
+				else if(token_cnt == 1) {
+					if(strcmp(token, "allow") == 0)
+						node->action = 'a';
+					else if(strcmp(token, "deny") == 0)
+						node->action = 'd';
+					else {
+						printk(KERN_ERR "Parsing failed on action %s\n", token);
+						return -1;
+					}
+				}
+				else if(token_cnt == 2) {
+					if(strcmp(token, "tcp") == 0)
+						node->proto = 't';
+					else if(strcmp(token, "udp") == 0){
+						node->proto = 'u';
+					}
+					else if(strcmp(token, "icmp") == 0){
+						node->proto = 'm';
+					}
+					else if(strcmp(token, "ip") == 0){
+						node->proto = 'i';
+					}
+					else {
+						printk(KERN_ERR "Parsing failed on proto %s\n", token);
+						return -1;
+					}
+				}
+
+				token = strsep(&running, delim);
+				++token_cnt;
+			}
+			printk("Adding node %c %c\n", node->action, node->proto);
+			hash_add_rcu(hashmap, &node->hash, node->proto);
+		}
 	}
 	
 	return procfs_buffer_size;
@@ -62,34 +114,20 @@ int init_module(){
 	struct user_hash *rule = kmalloc(sizeof(struct user_hash), GFP_KERNEL);
 	unsigned int bkt = 0, cnt = 0;
 	struct hlist_node empty = {.next = NULL, .pprev = NULL };
-
-	printk("firewall init\n");
-
 	static const struct file_operations proc_file_fops = {
-	 .owner	= THIS_MODULE,
-	 //.open	= procfs_open,
-	 //.read	= seq_read,
-	 //.llseek	= seq_lseek,
-	 //.release	= single_release,
-	 	.write = procfile_write
+		.owner = THIS_MODULE,
+	 	.write = procfile_write,
 	};
 
 	procfs = proc_create(PROCFS_NAME, 0, NULL, &proc_file_fops);
 	if (procfs == NULL) {
-		//remove_proc_entry(PROCFS_NAME, &proc_root);
+		remove_proc_entry(PROCFS_NAME, NULL);
 		printk("Error: Could not initialize /proc/%s\n",
 			PROCFS_NAME);
 		return -ENOMEM;
 	}
 
-	//Our_Proc_File->read_proc  = procfile_read;
-	/*procfs->write_proc = procfile_write;
-	procfs->owner 	  = THIS_MODULE;
-	procfs->mode 	  = S_IFREG | S_IRUGO;
-	procfs->uid 	  = 0;
-	procfs->gid 	  = 0;
-	procfs->size 	  = 37;*/
-
+	printk("firewall init\n");
 	printk(KERN_INFO "/proc/%s created\n", PROCFS_NAME);
 
 	rule->id = 10;
@@ -155,6 +193,19 @@ int init_module(){
 
 
 void cleanup_module(){
+	struct user_hash *node; 
+	unsigned int bkt = 0;
+	hash_for_each_rcu(hashmap, bkt, node, hash){
+		printk("node %d proto %c in bucket %d\n", node->id, node->proto, bkt);
+	}
+	printk("possible i\n");
+	hash_for_each_possible_rcu(hashmap, node, hash, 'i'){
+		printk("node %d proto %c in bucket %d\n", node->id, node->proto, bkt);
+	}
+	printk("possible m\n");
+	hash_for_each_possible_rcu(hashmap, node, hash, 'm'){
+		printk("node %d proto %c in bucket %d\n", node->id, node->proto, bkt);
+	}
 	remove_proc_entry(PROCFS_NAME, NULL);
 	printk("firewall cleanup\n");
 
