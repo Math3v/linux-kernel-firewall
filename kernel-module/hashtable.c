@@ -113,9 +113,15 @@ static ssize_t procfs_write(struct file *file, const char *buffer, unsigned long
 				else if(token_cnt == 3) {
 					if(strcmp("any", token) == 0) {
 						node->src_ip = 0;
+						#ifdef DBG
+						printk("src_ip: %u\n", node->src_ip);
+						#endif
 					} 
 					else {
 						node->src_ip = htonl( in_aton(token) );
+						#ifdef DBG
+						printk("src_ip: %pI4h\n", &(node->src_ip));
+						#endif
 					}
 				}
 
