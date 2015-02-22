@@ -620,7 +620,6 @@ deps_/home/matej/dev/linux/pds/linux-kernel-firewall/kernel-module/hashtable.o :
   /usr/src/linux-headers-3.13.0-45-generic/arch/x86/include/asm/smap.h \
     $(wildcard include/config/x86/smap.h) \
   /usr/src/linux-headers-3.13.0-45-generic/arch/x86/include/asm/uaccess_64.h \
-  include/linux/seq_file.h \
 
 /home/matej/dev/linux/pds/linux-kernel-firewall/kernel-module/hashtable.o: $(deps_/home/matej/dev/linux/pds/linux-kernel-firewall/kernel-module/hashtable.o)
 
