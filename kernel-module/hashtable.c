@@ -82,9 +82,9 @@ static ssize_t procfs_write(struct file *file, const char *buffer, unsigned long
 				}
 				/* parse action */
 				else if(token_cnt == 1) {
-					if(strcmp(token, "allow") == 0)
+					if(strcmp("allow", token) == 0)
 						node->action = 'a';
-					else if(strcmp(token, "deny") == 0)
+					else if(strcmp("deny", token) == 0)
 						node->action = 'd';
 					else {
 						printk(KERN_ERR "Parsing failed on action %s\n", token);
@@ -93,15 +93,15 @@ static ssize_t procfs_write(struct file *file, const char *buffer, unsigned long
 				}
 				/* parse proto */
 				else if(token_cnt == 2) {
-					if(strcmp(token, "tcp") == 0)
+					if(strcmp("tcp", token) == 0)
 						node->proto = 1000;
-					else if(strcmp(token, "udp") == 0){
+					else if(strcmp("udp", token) == 0){
 						node->proto = 2500;
 					}
-					else if(strcmp(token, "icmp") == 0){
+					else if(strcmp("icmp", token) == 0){
 						node->proto = 3800;
 					}
-					else if(strcmp(token, "ip") == 0){
+					else if(strcmp("ip", token) == 0){
 						node->proto = 4200;
 					}
 					else {
