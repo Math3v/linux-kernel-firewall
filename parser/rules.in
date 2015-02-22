@@ -4,3 +4,4 @@
 40 deny ip from any to any
 50 deny icmp from any to 1.1.1.1
 60 allow ip from any to any src-port 20 dst-port 21
+70 deny icmp from 8.8.8.8 to any
