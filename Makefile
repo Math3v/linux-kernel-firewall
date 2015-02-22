@@ -2,10 +2,10 @@ SUBDIRS = kernel-module parser
 
 all:
 	for dir in $(SUBDIRS); do \
-	  cd $$dir && $(MAKE); \
+	  $(MAKE) -C $$dir; \
 	done
 
 clean:
 	for dir in $(SUBDIRS); do \
-	  cd $$dir && $(MAKE) clean; \
+	  $(MAKE) clean -C $$dir; \
 	done
