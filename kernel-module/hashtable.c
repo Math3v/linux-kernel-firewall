@@ -200,7 +200,8 @@ int init_module(){
 
 
 void cleanup_module(){
-	struct user_hash *node; 
+	struct user_hash *node, *existing;
+	struct hlist_node *prev; 
 	unsigned int bkt = 0;
 	hash_for_each_rcu(hashmap, bkt, node, hash){
 		printk("node %d proto %d in bucket %d\n", node->id, node->proto, bkt);
@@ -216,4 +217,17 @@ void cleanup_module(){
 	remove_proc_entry(PROCFS_NAME, NULL);
 	printk("firewall cleanup\n");
 
+	printk("hashmap cleanup\n");
+	node = NULL;
+	prev = NULL;
+	hash_for_each_rcu(hashmap, bkt, existing, hash) {
+		if(prev != NULL) 
+			hash_del(prev);
+		kfree(node);
+		prev = &existing->hash;
+		node = existing;
+	}
+	hash_del(prev);
+	kfree(node);
+	printk("all good, module is removed\n");
 }
