@@ -39,7 +39,7 @@ static ssize_t procfs_write(struct file *file, const char *buffer, unsigned long
 		   void *data)
 {
 	const char delim[2] = " ";
-	unsigned int cnt = 0, token_cnt = 0;
+	unsigned int cnt = 0, token_cnt = 0, ui_tmp = 0;
 	char *token, *running, *line;
 	struct user_hash *node;
 
@@ -123,6 +123,37 @@ static ssize_t procfs_write(struct file *file, const char *buffer, unsigned long
 						printk("src_ip: %pI4h\n", &(node->src_ip));
 						#endif
 					}
+				}
+				/* parse dst_ip */
+				else if(token_cnt == 4) {
+					if(strcmp("any", token) == 0) {
+						node->dst_ip = 0;
+						#ifdef DBG
+						printk("dst_ip: %u\n", node->dst_ip);
+						#endif
+					} 
+					else {
+						node->dst_ip = htonl( in_aton(token) );
+						#ifdef DBG
+						printk("dst_ip: %pI4h\n", &(node->dst_ip));
+						#endif
+					}
+				}
+				/* parse src_port */
+				else if(token_cnt == 5) {
+					kstrtouint(token, 10, &ui_tmp);
+					node->src_port = (unsigned short) ui_tmp;
+					#ifdef DBG
+					printk("src_port: %u\n", node->src_port);
+					#endif
+				}
+				/* parse dst_port */
+				else if(token_cnt == 6) {
+					kstrtouint(token, 10, &ui_tmp);
+					node->dst_port = (unsigned short) ui_tmp;
+					#ifdef DBG
+					printk("dst_port: %u\n", node->dst_port);
+					#endif
 				}
 
 				token = strsep(&running, delim);
