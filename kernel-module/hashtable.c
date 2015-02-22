@@ -4,6 +4,8 @@
 #include <linux/slab.h>
 #include <linux/proc_fs.h>
 #include <asm/uaccess.h> /* copy_from_user */
+#include <linux/inet.h>  /* inet_hton ... */
+#include <linux/in.h>
 #include <linux/fs.h>
 #include <linux/string.h>
 
@@ -105,6 +107,15 @@ static ssize_t procfs_write(struct file *file, const char *buffer, unsigned long
 					else {
 						printk(KERN_ERR "Parsing failed on proto %s\n", token);
 						return -1;
+					}
+				}
+				/* parse src_ip */
+				else if(token_cnt == 3) {
+					if(strcmp("any", token) == 0) {
+						node->src_ip = 0;
+					} 
+					else {
+						node->src_ip = htonl( in_aton(token) );
 					}
 				}
 

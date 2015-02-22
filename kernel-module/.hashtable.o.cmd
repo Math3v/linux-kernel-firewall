@@ -620,6 +620,18 @@ deps_/home/matej/dev/linux/pds/linux-kernel-firewall/kernel-module/hashtable.o :
   /usr/src/linux-headers-3.13.0-45-generic/arch/x86/include/asm/smap.h \
     $(wildcard include/config/x86/smap.h) \
   /usr/src/linux-headers-3.13.0-45-generic/arch/x86/include/asm/uaccess_64.h \
+  include/linux/inet.h \
+  include/linux/in.h \
+  include/uapi/linux/in.h \
+  include/linux/socket.h \
+  /usr/src/linux-headers-3.13.0-45-generic/arch/x86/include/uapi/asm/socket.h \
+  /usr/src/linux-headers-3.13.0-45-generic/include/uapi/asm-generic/socket.h \
+  /usr/src/linux-headers-3.13.0-45-generic/arch/x86/include/uapi/asm/sockios.h \
+  /usr/src/linux-headers-3.13.0-45-generic/include/uapi/asm-generic/sockios.h \
+  /usr/src/linux-headers-3.13.0-45-generic/include/uapi/linux/sockios.h \
+  include/linux/uio.h \
+  include/uapi/linux/uio.h \
+  include/uapi/linux/socket.h \
 
 /home/matej/dev/linux/pds/linux-kernel-firewall/kernel-module/hashtable.o: $(deps_/home/matej/dev/linux/pds/linux-kernel-firewall/kernel-module/hashtable.o)
 
