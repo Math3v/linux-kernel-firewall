@@ -34,10 +34,15 @@ static struct proc_dir_entry *procfs;
 static char procfs_buffer[PROCFS_MAX_SIZE];
 static unsigned long procfs_buffer_size = 0;
 
+typedef enum action_t {
+	allow,
+	deny
+};
+
 struct user_hash {
 	struct hlist_node hash;
 	unsigned int id;
-	unsigned char action; /* d-deny a-allow */
+	enum action_t action; /* d-deny a-allow */
 	unsigned int proto; /* 1000-tcp 2500-udp 3800-icmp 4200-ip */
 	unsigned int src_ip;
 	unsigned int dst_ip;
@@ -93,9 +98,9 @@ static ssize_t procfs_write(struct file *file, const char *buffer, unsigned long
 				/* parse action */
 				else if(token_cnt == 1) {
 					if(strcmp("allow", token) == 0)
-						node->action = 'a';
+						node->action = allow;
 					else if(strcmp("deny", token) == 0)
-						node->action = 'd';
+						node->action = deny;
 					else {
 						printk(KERN_ERR "Parsing failed on action %s\n", token);
 						return -1;
@@ -218,7 +223,7 @@ unsigned int hook_func_in(unsigned int hooknum, struct sk_buff *skb,
    			/* TODO verify */
    			if(node->dst_ip == 0 || node->dst_ip == dest_ip) {
    				/* TODO verify */
-   				if(node->action == 'd'){
+   				if(node->action == deny){
    					#ifdef DBG
    					printk("packet drop\n");
    					#endif
