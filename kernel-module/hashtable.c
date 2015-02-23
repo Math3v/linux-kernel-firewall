@@ -43,7 +43,7 @@ typedef enum proto_t {
 	tcp 	= 1000,
 	udp 	= 2500,
 	icmp 	= 3800,
-	ip 		= 4200
+	ip		= 4200
 };
 
 struct user_hash {
@@ -182,7 +182,7 @@ static ssize_t procfs_write(struct file *file, const char *buffer, unsigned long
 				++token_cnt;
 			}
 			#ifdef DBG
-				printk("Adding node %c %d\n", node->action, node->proto);
+				printk("Adding node %d %d\n", node->action, node->proto);
 			#endif
 			hash_add_rcu(hashmap, &node->hash, node->proto);
 		}
@@ -223,19 +223,29 @@ unsigned int hook_func_in(unsigned int hooknum, struct sk_buff *skb,
        proto_key = icmp;
    }
 
+   /* TODO: IP protocol filtering */
+
    hash_for_each_possible_rcu(hashmap, node, hash, proto_key) {
    		printk("Possible rule-id %u\n", node->id);
    		printk("node->src_ip src_ip %pI4h %pI4h\n", &(node->src_ip), &src_ip);
    		if(node->src_ip == 0 || node->src_ip == src_ip) {
-   			/* TODO verify */
    			if(node->dst_ip == 0 || node->dst_ip == dest_ip) {
-   				/* TODO verify */
-   				if(node->action == deny){
-   					#ifdef DBG
-   					printk("packet drop\n");
-   					#endif
-   					return NF_DROP;
-   				}
+   				if(node->src_port == 0 || node->src_port == src_port) {
+   					if(node->dst_port == 0 || node->dst_port == dest_port) {
+   						if(node->action == deny) {
+   							#ifdef DBG
+   							printk("packet drop\n");
+   							#endif
+   							return NF_DROP;
+   						}
+   						else if(node->action == allow) {
+   							#ifdef DBG
+   							printk("packet access\n");
+   							#endif
+   							return NF_ACCEPT;
+   						}
+   					}
+   				}	
    			}
    		}
    }
