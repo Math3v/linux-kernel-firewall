@@ -224,7 +224,7 @@ unsigned int hook_func_in(unsigned int hooknum, struct sk_buff *skb,
    }
 
    /* TODO: IP protocol filtering */
-
+   /* TODO: Descending rules inside one bucket need to be ascending */
    hash_for_each_possible_rcu(hashmap, node, hash, proto_key) {
    		printk("Possible rule-id %u\n", node->id);
    		printk("node->src_ip src_ip %pI4h %pI4h\n", &(node->src_ip), &src_ip);
