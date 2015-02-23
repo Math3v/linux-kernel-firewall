@@ -39,11 +39,18 @@ typedef enum action_t {
 	deny
 };
 
+typedef enum proto_t {
+	tcp 	= 1000,
+	udp 	= 2500,
+	icmp 	= 3800,
+	ip 		= 4200
+};
+
 struct user_hash {
 	struct hlist_node hash;
 	unsigned int id;
-	enum action_t action; /* d-deny a-allow */
-	unsigned int proto; /* 1000-tcp 2500-udp 3800-icmp 4200-ip */
+	enum action_t action;
+	enum proto_t proto;
 	unsigned int src_ip;
 	unsigned int dst_ip;
 	unsigned short src_port;
@@ -109,15 +116,15 @@ static ssize_t procfs_write(struct file *file, const char *buffer, unsigned long
 				/* parse proto */
 				else if(token_cnt == 2) {
 					if(strcmp("tcp", token) == 0)
-						node->proto = 1000;
+						node->proto = tcp;
 					else if(strcmp("udp", token) == 0){
-						node->proto = 2500;
+						node->proto = udp;
 					}
 					else if(strcmp("icmp", token) == 0){
-						node->proto = 3800;
+						node->proto = icmp;
 					}
 					else if(strcmp("ip", token) == 0){
-						node->proto = 4200;
+						node->proto = ip;
 					}
 					else {
 						printk(KERN_ERR "Parsing failed on proto %s\n", token);
@@ -206,14 +213,14 @@ unsigned int hook_func_in(unsigned int hooknum, struct sk_buff *skb,
        udp_header = (struct udphdr *)(skb_transport_header(skb)+20);
        src_port = (unsigned int)ntohs(udp_header->source);
        dest_port = (unsigned int)ntohs(udp_header->dest);
-       proto_key = 2500;
+       proto_key = udp;
    } else if (ip_header->protocol == 6) { /* TCP */
        tcp_header = (struct tcphdr *)(skb_transport_header(skb)+20);
        src_port = (unsigned int)ntohs(tcp_header->source);
        dest_port = (unsigned int)ntohs(tcp_header->dest);
-       proto_key = 1000;
+       proto_key = tcp;
    } else if (ip_header->protocol == 1 ) { /* ICMP */
-       proto_key = 3800;
+       proto_key = icmp;
    }
 
    hash_for_each_possible_rcu(hashmap, node, hash, proto_key) {
