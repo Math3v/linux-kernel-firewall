@@ -56,6 +56,7 @@ void parse_rules(){
 	do {
 		yyparse();
 	} while (!feof(yyin));	
+	fclose(myfile);
 }
 
 void send_rules() {
@@ -65,16 +66,26 @@ void send_rules() {
 }
 
 void print_rules(){
-	for(std::list<rule_t>::iterator i = rulesList.begin(); i != rulesList.end(); ++i) {
-		cout << i->id << " ";
-		cout << i->action << " ";
-		cout << i->proto << " ";
-		cout << i->src_ip << " ";
-		cout << i->dst_ip << " ";
-		cout << i->src_port << " ";
-		cout << i->dst_port << " ";
-		cout << endl;
+	char c;
+	FILE *fr;
+	unsigned int cnt = 10;
+
+	fr = fopen(PROCFILE, "r");
+
+	fprintf(stdout, "Trying to read %s\n", PROCFILE);
+	if(fr == NULL) {
+		fprintf(stderr, "Cannot open file %s\n", PROCFILE);
+		exit(-1);
 	}
+
+	c = fgetc(fr);
+	while(c != 's') {
+		fprintf(stdout, "%c", c);
+		c = fgetc(fr);
+		--cnt;
+		if(cnt == 0) break;
+	}
+	fclose(fr);
 }
 
 int main(int argc, char *argv[]){
