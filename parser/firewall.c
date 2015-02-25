@@ -66,9 +66,8 @@ void send_rules() {
 }
 
 void print_rules(){
-	char c;
 	FILE *fr;
-	unsigned int cnt = 10;
+	char c;
 
 	fr = fopen(PROCFILE, "r");
 
@@ -77,14 +76,10 @@ void print_rules(){
 		fprintf(stderr, "Cannot open file %s\n", PROCFILE);
 		exit(-1);
 	}
-
-	c = fgetc(fr);
-	while(c != 's') {
-		fprintf(stdout, "%c", c);
-		c = fgetc(fr);
-		--cnt;
-		if(cnt == 0) break;
-	}
+	
+  	while((c = fgetc(fr)) != EOF) {
+  		fprintf(stdout, "%c", c);
+  	}
 	fclose(fr);
 }
 

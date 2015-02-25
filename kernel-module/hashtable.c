@@ -57,34 +57,17 @@ struct user_hash {
 	unsigned short dst_port;
 };
 
-int procfs_read(char *buffer, char **buffer_location, off_t offset, int buffer_length, int *eof, void *data)
-{
-	char token[20] = "test\n";
-	int procfs_buffer_pos = 0;
-	int ret;
+static ssize_t proc_read(struct file *file, char __user *buffer, size_t count, loff_t * data){
 
-	printk("Called read with offset %i and buffer length %d\n", offset, buffer_length);
-	/*
-    memcpy(&procfs_buffer, token, strlen(token));
-    procfs_buffer_pos += strlen(token);
- 
-    memcpy(&procfs_buffer, "\n", 1);
-    procfs_buffer_pos++;
- 
-    memcpy(buffer, &procfs_buffer, procfs_buffer_pos);
-    //*eof = 1; Generates SIGKILL
-    */
-    if(offset > 0) {
-    	printk("Offset > 0\n");
-    	ret = 0;
-    }
-    else {
-    	memcpy(buffer, &token, strlen(token));
-    	ret = strlen(token);
+    if((int)*data>0){
+        return 0;
     }
 
+    char * ret_str = "This is actually me!!!\n";
 
-    return ret;
+    *data += strlen(ret_str);
+    memcpy(buffer, ret_str, strlen(ret_str));
+    return strlen(ret_str);
 }
 
 int procfs_read__dummy(char *buffer, char **buffer_location, off_t offset, int buffer_length, int *eof, void *data)
@@ -363,7 +346,7 @@ int init_module(){
 	static const struct file_operations proc_file_fops = {
 		.owner = THIS_MODULE,
 	 	.write = procfs_write,
-	 	.read = procfs_read,
+	 	.read = proc_read,
 	};
 
 	procfs = proc_create(PROCFS_NAME, 0, NULL, &proc_file_fops);
