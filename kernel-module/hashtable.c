@@ -14,7 +14,8 @@
 #include <linux/tcp.h>
 #include <linux/ip.h>
 
-#define LINE_MAX_SIZE 50
+#define INT_MAX_LEN 20
+#define LINE_MAX_SIZE 100
 #define PROCFS_MAX_SIZE 1024
 #define PROCFS_NAME "linux-kernel-firewall"
 #define DBG
@@ -57,17 +58,100 @@ struct user_hash {
 	unsigned short dst_port;
 };
 
+void get_action(enum action_t *action, char **p) {
+	switch(*action){
+    		case allow:
+    			strcpy(*p, "allow");
+    			break;
+    		case deny:
+    			strcpy(*p, "deny");
+    			break;
+    	}
+}
+
+void get_proto(enum proto_t *proto, char **p) {
+	switch(*proto) {
+		case icmp:
+			strcpy(*p, "icmp");
+			break;
+		case ip:
+			strcpy(*p, "ip");
+			break;
+		case tcp:
+			strcpy(*p, "tcp");
+			break;
+		case udp:
+			strcpy(*p, "udp");
+			break;
+	}
+}
+
+void remove_null(char **p, unsigned int *pos) {
+	unsigned int i;
+	for(i = *pos; i < INT_MAX_LEN; ++i) {
+		(*p)[i] = ' ';
+	}
+}
+
 static ssize_t proc_read(struct file *file, char __user *buffer, size_t count, loff_t * data){
+	ssize_t off = 0;
+	struct user_hash *node;
+	unsigned int bkt = 0, ret;
+	char *buff = vmalloc(LINE_MAX_SIZE);
+	char *delim = "\n", *space = " ";
+	char *c = vmalloc(INT_MAX_LEN);
+
+	printk("Count %d\n", count);
 
     if((int)*data>0){
         return 0;
     }
 
-    char * ret_str = "This is actually me!!!\n";
+    //char * ret_str = "This is actually me!!!\n";
+    hash_for_each_rcu(hashmap, bkt, node, hash) {
+    	printk("To buffer+%d: %d\n", off, node->id);
+    	ret = snprintf(c, INT_MAX_LEN, "%u", node->id);
+    	remove_null(&c, &ret);
 
-    *data += strlen(ret_str);
-    memcpy(buffer, ret_str, strlen(ret_str));
-    return strlen(ret_str);
+    	/* add id */
+    	memcpy(buff + off, c, sizeof(unsigned int));
+    	off += sizeof(unsigned int);
+
+    	/* add action */
+    	get_action(&node->action, &c);
+    	memcpy(buff + off, c, strlen(c));
+    	off += strlen(c);
+
+    	memcpy(buff + off, space, strlen(space));
+    	off += strlen(space);
+
+    	/* add proto */
+    	get_proto(&node->proto, &c);
+    	memcpy(buff + off, c, strlen(c));
+    	off += strlen(c);
+
+    	memcpy(buff + off, space, strlen(space));
+    	off += strlen(space);
+    	
+    	/* add src_ip */
+    	ret = snprintf(c, INT_MAX_LEN, "%u", node->src_ip);
+    	remove_null(&c, &ret);
+    	memcpy(buff + off, c, sizeof(unsigned int));
+    	off += sizeof(unsigned int);
+    	
+    	/* add end of line */
+    	memcpy(buff + off, delim, strlen(delim));
+    	off += strlen(delim);
+    }
+    buff[off] = '\0';
+
+    *data += off;
+    memcpy(buffer, buff, strlen(buff));
+    printk("Buff %s\n", buff);
+
+    vfree(buff);
+    vfree(c);
+    return off;
 }
 
 int procfs_read__dummy(char *buffer, char **buffer_location, off_t offset, int buffer_length, int *eof, void *data)
