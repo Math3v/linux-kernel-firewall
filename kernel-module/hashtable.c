@@ -145,15 +145,43 @@ static ssize_t proc_read(struct file *file, char __user *buffer, size_t count, l
     	off += strlen(space);
     	
     	/* add src_ip */
-    	//ret = snprintf(c, INT_MAX_LEN, "%u", node->src_ip);
-    	//remove_null(&c, &ret);
-    	//memcpy(buff + off, c, sizeof(unsigned int));
-    	//off += sizeof(unsigned int);
     	remove_null(&c, &zero);
     	ip_len = iptostr(&node->src_ip, &c, strlen(c));
     	memcpy(buff + off, c, ip_len);
     	off += ip_len;
-    	
+
+    	memcpy(buff + off, space, strlen(space));
+    	off += strlen(space);
+
+    	/* add dst_ip */
+    	remove_null(&c, &zero);
+    	ip_len = iptostr(&node->dst_ip, &c, strlen(c));
+    	memcpy(buff + off, c, ip_len);
+    	off += ip_len;
+
+    	memcpy(buff + off, space, strlen(space));
+    	off += strlen(space);
+
+    	/* add src_port */
+    	remove_null(&c, &zero);
+    	ret = snprintf(c, INT_MAX_LEN, "%u", node->src_port);
+    	remove_null(&c, &ret);
+    	memcpy(buff + off, c, ret);
+    	off += ret;
+
+    	memcpy(buff + off, space, strlen(space));
+    	off += strlen(space);
+
+    	/* add dst_port */
+    	remove_null(&c, &zero);
+    	ret = snprintf(c, INT_MAX_LEN, "%u", node->dst_port);
+    	remove_null(&c, &ret);
+    	memcpy(buff + off, c, ret);
+    	off += ret;
+
+    	memcpy(buff + off, space, strlen(space));
+    	off += strlen(space);
+
     	/* add end of line */
     	memcpy(buff + off, delim, strlen(delim));
     	off += strlen(delim);
