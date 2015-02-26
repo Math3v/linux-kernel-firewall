@@ -58,6 +58,24 @@ struct user_hash {
 	unsigned short dst_port;
 };
 
+void remove_null(char **p, unsigned int *pos) {
+	unsigned int i;
+	for(i = *pos; i < INT_MAX_LEN; ++i) {
+		(*p)[i] = ' ';
+	}
+}
+
+unsigned int iptostr(unsigned int *ip, char **str, unsigned int maxlen) {
+	unsigned char f = ((*ip) & (0xFF000000)) >> 24;
+	unsigned char s = ((*ip) & (0x00FF0000)) >> 16;
+	unsigned char t = ((*ip) & (0x0000FF00)) >> 8;
+	unsigned char h = (*ip) & (0x000000FF);
+	unsigned int ret = snprintf(*str, maxlen, "%u.%u.%u.%u", f, s, t, h);
+
+	remove_null(str, &ret);
+	return ret;
+}
+
 void get_action(enum action_t *action, char **p) {
 	switch(*action){
     		case allow:
@@ -86,13 +104,6 @@ void get_proto(enum proto_t *proto, char **p) {
 	}
 }
 
-void remove_null(char **p, unsigned int *pos) {
-	unsigned int i;
-	for(i = *pos; i < INT_MAX_LEN; ++i) {
-		(*p)[i] = ' ';
-	}
-}
-
 static ssize_t proc_read(struct file *file, char __user *buffer, size_t count, loff_t * data){
 	ssize_t off = 0;
 	struct user_hash *node;
@@ -100,6 +111,7 @@ static ssize_t proc_read(struct file *file, char __user *buffer, size_t count, l
 	char *buff = vmalloc(LINE_MAX_SIZE);
 	char *delim = "\n", *space = " ";
 	char *c = vmalloc(INT_MAX_LEN);
+	unsigned int zero = 0, ip_len = 0;
 
 	printk("Count %d\n", count);
 
@@ -109,7 +121,6 @@ static ssize_t proc_read(struct file *file, char __user *buffer, size_t count, l
 
     //char * ret_str = "This is actually me!!!\n";
     hash_for_each_rcu(hashmap, bkt, node, hash) {
-    	printk("To buffer+%d: %d\n", off, node->id);
     	ret = snprintf(c, INT_MAX_LEN, "%u", node->id);
     	remove_null(&c, &ret);
 
@@ -134,10 +145,14 @@ static ssize_t proc_read(struct file *file, char __user *buffer, size_t count, l
     	off += strlen(space);
     	
     	/* add src_ip */
-    	ret = snprintf(c, INT_MAX_LEN, "%u", node->src_ip);
-    	remove_null(&c, &ret);
-    	memcpy(buff + off, c, sizeof(unsigned int));
-    	off += sizeof(unsigned int);
+    	//ret = snprintf(c, INT_MAX_LEN, "%u", node->src_ip);
+    	//remove_null(&c, &ret);
+    	//memcpy(buff + off, c, sizeof(unsigned int));
+    	//off += sizeof(unsigned int);
+    	remove_null(&c, &zero);
+    	ip_len = iptostr(&node->src_ip, &c, strlen(c));
+    	memcpy(buff + off, c, ip_len);
+    	off += ip_len;
     	
     	/* add end of line */
     	memcpy(buff + off, delim, strlen(delim));
@@ -147,7 +162,6 @@ static ssize_t proc_read(struct file *file, char __user *buffer, size_t count, l
 
     *data += off;
     memcpy(buffer, buff, strlen(buff));
-    printk("Buff %s\n", buff);
 
     vfree(buff);
     vfree(c);
