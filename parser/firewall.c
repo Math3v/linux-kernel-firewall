@@ -32,14 +32,25 @@ void send_to_proc(char *str) {
 }
 
 void send_rule_to_proc(struct rule_t rule) {
-	char srule[200];
+	char *srule;
+
+	srule = (char *) calloc(MAXLEN, sizeof(char));
+	if(srule == NULL) {
+		fprintf(stderr, "Cannot allocate memory\n");
+		exit(EXIT_FAILURE);
+	}
+
 	sprintf(srule, "%d %s %s %s %s %d %d\n",
 		rule.id, rule.action, rule.proto,
 		rule.src_ip, rule.dst_ip,
 		rule.src_port, rule.dst_port);
 
-	fprintf(stdout, "Sending %s", srule);
+	#ifdef DEBUG
+	printf("Sending '%s'\n", srule);
+	#endif
+
 	send_to_proc(srule);
+	free(srule);
 }
 
 void yyerror(const char *s) {
@@ -125,6 +136,7 @@ void add_rule(int argc, char **argv) {
 
 	parse_rules(TEMPFILE);
 	/* send_rules(); */
+
 	#ifdef DEBUG
 	for(std::list<rule_t>::iterator i = rulesList.begin(); i != rulesList.end(); ++i) {
 		printf("In list: %d\n", (*i).id);
