@@ -91,7 +91,7 @@ void concat_rule(char **rule, int argc, char **argv) {
 	int i;
 	char *tmp = NULL;
 
-	tmp = (char *) calloc(1024, sizeof(char));
+	tmp = (char *) calloc(MAXLEN, sizeof(char));
 	if(tmp == NULL) {
 		fprintf(stderr, "Cannot allocate memory\n");
 		exit(EXIT_FAILURE);
