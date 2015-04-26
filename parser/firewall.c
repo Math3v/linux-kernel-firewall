@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 
 using namespace std;
 
@@ -11,9 +12,10 @@ using namespace std;
 
 extern "C" FILE *yyin;
 extern int line_num;
-extern void yyerror(const char *s);
+extern void yyerror( const char *s );
 
 #define PROCFILE "/proc/linux-kernel-firewall"
+#define TEMPFILE "tmp"
 
 void send_to_proc(char *str) {
 	FILE *fw;
@@ -39,14 +41,14 @@ void send_rule_to_proc(struct rule_t rule) {
 }
 
 void yyerror(const char *s) {
-       cout << "EEK, parse error!  Message: " << s << " on line: " << line_num;
+       cout << "ERROR: " << s << " on line: " << line_num << endl;
        exit(-1);
 }
 
-void parse_rules(){
-	FILE *myfile = fopen("rules.in", "r");
+void parse_rules(const char *filename){
+	FILE *myfile = fopen(filename, "r");
 	if (!myfile) {
-		cout << "I can't open a.snazzle.file!" << endl;
+		fprintf(stderr, "Cannot open file '%s'\n", filename);
 		exit(-1);
 	}
 	// set flex to read from it instead of defaulting to STDIN:
@@ -83,10 +85,46 @@ void print_rules(){
 	fclose(fr);
 }
 
-int main(int argc, char *argv[]){
+void concat_rule(char **rule, int argc, char **argv) {
+	int i;
+	char tmp[1024];
 
-	parse_rules();
-	send_rules();
+	for(i = 2; i < argc; i++) {
+		strcat(tmp, argv[i]);
+		if(i != (argc - 1))
+			strcat(tmp, " ");
+	}
+
+	*rule = (char *) calloc(strlen(tmp), sizeof(char));
+	strcpy(*rule, tmp);
+}
+
+void add_rule(int argc, char **argv) {
+	char *line;
+	rule_t rule;
+	FILE *tmp = fopen(TEMPFILE, "w");
+
+	if(tmp == NULL) {
+		fprintf(stderr, "Cannot open file '%s'\n", TEMPFILE);
+		exit(EXIT_FAILURE);
+	}
+
+	concat_rule(&line, argc, argv);
+	fprintf(tmp, "%s\n", line);
+	parse_rules(TEMPFILE);
+
+	for(std::list<rule_t>::iterator i = rulesList.begin(); i != rulesList.end(); ++i) {
+		printf("%d\n", (*i).id);
+	}
+
+	free(line);
+	fclose(tmp);
+	remove(TEMPFILE);
+}
+
+int main(int argc, char *argv[]){
+	//parse_rules();
+	//send_rules();
 
 	int opt;
 	while((opt = getopt(argc, argv, "pa:d:f:")) != -1) {
@@ -95,6 +133,7 @@ int main(int argc, char *argv[]){
 				print_rules();
 				break;
 			case 'a': /* add rule */
+				add_rule(argc, argv);
 				break;
 			case 'd': /* delete rule rule-id */
 				break;
