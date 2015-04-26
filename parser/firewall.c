@@ -16,6 +16,8 @@ extern void yyerror( const char *s );
 
 #define PROCFILE "/proc/linux-kernel-firewall"
 #define TEMPFILE "tmp"
+#define DEBUG
+#define MAXLEN 1024
 
 void send_to_proc(char *str) {
 	FILE *fw;
@@ -87,7 +89,13 @@ void print_rules(){
 
 void concat_rule(char **rule, int argc, char **argv) {
 	int i;
-	char tmp[1024];
+	char *tmp = NULL;
+
+	tmp = (char *) calloc(1024, sizeof(char));
+	if(tmp == NULL) {
+		fprintf(stderr, "Cannot allocate memory\n");
+		exit(EXIT_FAILURE);
+	}
 
 	for(i = 2; i < argc; i++) {
 		strcat(tmp, argv[i]);
@@ -97,13 +105,15 @@ void concat_rule(char **rule, int argc, char **argv) {
 
 	*rule = (char *) calloc(strlen(tmp), sizeof(char));
 	strcpy(*rule, tmp);
+
+	free(tmp);
 }
 
 void add_rule(int argc, char **argv) {
 	char *line;
-	rule_t rule;
-	FILE *tmp = fopen(TEMPFILE, "w");
+	FILE *tmp;
 
+	tmp = fopen(TEMPFILE, "w");
 	if(tmp == NULL) {
 		fprintf(stderr, "Cannot open file '%s'\n", TEMPFILE);
 		exit(EXIT_FAILURE);
@@ -111,20 +121,21 @@ void add_rule(int argc, char **argv) {
 
 	concat_rule(&line, argc, argv);
 	fprintf(tmp, "%s\n", line);
-	parse_rules(TEMPFILE);
+	fclose(tmp);
 
+	parse_rules(TEMPFILE);
+	/* send_rules(); */
+	#ifdef DEBUG
 	for(std::list<rule_t>::iterator i = rulesList.begin(); i != rulesList.end(); ++i) {
-		printf("%d\n", (*i).id);
+		printf("In list: %d\n", (*i).id);
 	}
+	#endif
 
 	free(line);
-	fclose(tmp);
 	remove(TEMPFILE);
 }
 
 int main(int argc, char *argv[]){
-	//parse_rules();
-	//send_rules();
 
 	int opt;
 	while((opt = getopt(argc, argv, "pa:d:f:")) != -1) {
@@ -138,6 +149,8 @@ int main(int argc, char *argv[]){
 			case 'd': /* delete rule rule-id */
 				break;
 			case 'f': /* read rules from file */
+				parse_rules(optarg);
+				/*send_rules();*/
 				break;
 			default: /* unmatched argument */
 				fprintf(stderr, "Usage: %s -a rule | -p | -d rule-id | -f file>\n", 
