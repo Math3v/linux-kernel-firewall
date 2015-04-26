@@ -8,6 +8,9 @@
 #include "firewall_parser.tab.h"
 int line_num = 1;
 %}
+
+%option nounput
+
 %%
 [ \t]									;
 [0-9]+									{ yylval.ival = atoi(yytext);   return INT;		}
