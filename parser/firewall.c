@@ -135,6 +135,25 @@ void add_rule(int argc, char **argv) {
 	remove(TEMPFILE);
 }
 
+void del_rule(char *id) {
+	char *sproc;
+
+	sproc = (char *) calloc(MAXLEN, sizeof(char));
+	if(sproc == NULL) {
+		fprintf(stderr, "Cannot allocate memory\n");
+		exit(EXIT_FAILURE);
+	}
+
+	#ifdef DEBUG
+	printf("Deleting rule-id '%s'\n", id);
+	#endif
+
+	sprintf(sproc, "d %s\n", id);
+	/* send_to_proc(sproc); */
+
+	free(sproc);
+}
+
 int main(int argc, char *argv[]){
 
 	int opt;
@@ -147,6 +166,7 @@ int main(int argc, char *argv[]){
 				add_rule(argc, argv);
 				break;
 			case 'd': /* delete rule rule-id */
+				del_rule(optarg);
 				break;
 			case 'f': /* read rules from file */
 				parse_rules(optarg);
