@@ -31,8 +31,18 @@ void send_to_proc(char *str) {
 	fclose(fw);
 }
 
+int is_duplicate(int id) {
+	/* TODO */
+	return 0; /* false */
+}
+
 void send_rule_to_proc(struct rule_t rule) {
 	char *srule;
+
+	if(is_duplicate(rule.id) == 1) {
+		fprintf(stderr, "Cannot add rule with id %d, because it is a duplicate id\n", rule.id);
+		return;
+	}
 
 	srule = (char *) calloc(MAXLEN, sizeof(char));
 	if(srule == NULL) {
@@ -82,20 +92,26 @@ void send_rules() {
 
 void print_rules(){
 	FILE *fr;
-	char c;
+	char *line;
+
+	line = (char *) calloc(MAXLEN, sizeof(char));
+	if(line == NULL) {
+		fprintf(stderr, "Cannot allocate memory\n");
+		exit(EXIT_FAILURE);
+	}
 
 	fr = fopen(PROCFILE, "r");
-
-	fprintf(stdout, "Trying to read %s\n", PROCFILE);
 	if(fr == NULL) {
 		fprintf(stderr, "Cannot open file %s\n", PROCFILE);
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}
 	
-  	while((c = fgetc(fr)) != EOF) {
-  		fprintf(stdout, "%c", c);
+  	while(fgets(line, MAXLEN, fr) != NULL) {
+  		printf("%s", line);
   	}
+
 	fclose(fr);
+	free(line);
 }
 
 void concat_rule(char **rule, int argc, char **argv) {
