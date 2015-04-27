@@ -28,7 +28,6 @@ DEFINE_HASHTABLE(hashmap, 4);
 
 //the structure used to register the function
 static struct nf_hook_ops nfho;
-static struct nf_hook_ops nfho_out;
 
 //variables for procfs
 static struct proc_dir_entry *procfs;
@@ -104,7 +103,36 @@ void get_proto(enum proto_t *proto, char **p) {
 	}
 }
 
-static ssize_t proc_read(struct file *file, char __user *buffer, size_t count, loff_t * data){
+void delete_rule(const char *aid) {
+	unsigned int id, bkt;
+	struct user_hash *node;
+	struct hlist_node *tmp;
+
+	if(aid == NULL) {
+		printk(KERN_ERR "Id came null to delete_rule\n");
+		return;
+	}
+
+	if(kstrtouint(aid, 10, &id) != 0) {
+		printk(KERN_ERR "ERROR: kstrtouint failed\n");
+		return;
+	}
+
+	#ifdef DBG
+	printk("Attempting to delete node '%s'\n", aid);
+	#endif
+	hash_for_each_safe(hashmap, bkt, tmp, node, hash){
+		if(id == node->id){
+			#ifdef DBG
+			printk("Deleting node %d proto %d in bucket %d\n", node->id, node->proto, bkt);
+			#endif
+			hash_del(&node->hash);
+			break;
+		}
+	}
+}
+
+ssize_t proc_read(struct file *file, char __user *buffer, size_t count, loff_t *data){
 	ssize_t off = 0;
 	struct user_hash *node;
 	unsigned int bkt = 0, ret;
@@ -119,6 +147,10 @@ static ssize_t proc_read(struct file *file, char __user *buffer, size_t count, l
 
     //char * ret_str = "This is actually me!!!\n";
     hash_for_each_rcu(hashmap, bkt, node, hash) {
+    	#ifdef DBG
+    	printk("Sending rule-id '%d'\n", node->id);
+    	#endif
+
     	ret = snprintf(c, INT_MAX_LEN, "%u", node->id);
     	remove_null(&c, &ret);
 
@@ -183,6 +215,10 @@ static ssize_t proc_read(struct file *file, char __user *buffer, size_t count, l
     	/* add end of line */
     	memcpy(buff + off, delim, strlen(delim));
     	off += strlen(delim);
+
+    	#ifdef DEBUG
+    	printk("Buff is '%s'\n", buff);
+    	#endif
     }
     buff[off] = '\0';
 
@@ -194,11 +230,9 @@ static ssize_t proc_read(struct file *file, char __user *buffer, size_t count, l
     return off;
 }
 
-static ssize_t procfs_write(struct file *file, const char *buffer, unsigned long count,
-		   void *data)
-{
+ssize_t procfs_write(struct file *file, const char *buffer, unsigned long count, void *data) {
 	const char delim[2] = " ";
-	unsigned int cnt = 0, token_cnt = 0, ui_tmp = 0;
+	unsigned int cnt = 0, token_cnt = 0, ui_tmp = 0, del = 0;
 	char *token, *running, *line;
 	struct user_hash *node;
 
@@ -235,12 +269,34 @@ static ssize_t procfs_write(struct file *file, const char *buffer, unsigned long
 
 			while(token != NULL) {
 
-				/* parse rule-id */
+				#ifdef DBG
+				printk("Token '%s'\n", token);
+				#endif
+
+				/* parse add/delete */
 				if(token_cnt == 0) {
+					if(strcmp("a", token) == 0) {
+						/* This is actually nop, just "eat" the token */
+						del = 0;
+					}
+					else if(strcmp("d", token) == 0) {
+						token = strsep(&running, delim);
+						delete_rule(token);
+						del = 1;
+						/* Token should be NULL next time */
+						//break;
+					}
+					else {
+						printk(KERN_ERR "Add / delete is unknown value %s\n", token);
+						return -1;
+					}
+				}
+				/* parse rule-id */
+				else if(token_cnt == 1) {
 					kstrtouint(token, 10, &node->id);
 				}
 				/* parse action */
-				else if(token_cnt == 1) {
+				else if(token_cnt == 2) {
 					if(strcmp("allow", token) == 0)
 						node->action = allow;
 					else if(strcmp("deny", token) == 0)
@@ -251,7 +307,7 @@ static ssize_t procfs_write(struct file *file, const char *buffer, unsigned long
 					}
 				}
 				/* parse proto */
-				else if(token_cnt == 2) {
+				else if(token_cnt == 3) {
 					if(strcmp("tcp", token) == 0)
 						node->proto = tcp;
 					else if(strcmp("udp", token) == 0){
@@ -269,7 +325,7 @@ static ssize_t procfs_write(struct file *file, const char *buffer, unsigned long
 					}
 				}
 				/* parse src_ip */
-				else if(token_cnt == 3) {
+				else if(token_cnt == 4) {
 					if(strcmp("any", token) == 0) {
 						node->src_ip = 0;
 						#ifdef DBG
@@ -284,7 +340,7 @@ static ssize_t procfs_write(struct file *file, const char *buffer, unsigned long
 					}
 				}
 				/* parse dst_ip */
-				else if(token_cnt == 4) {
+				else if(token_cnt == 5) {
 					if(strcmp("any", token) == 0) {
 						node->dst_ip = 0;
 						#ifdef DBG
@@ -299,7 +355,7 @@ static ssize_t procfs_write(struct file *file, const char *buffer, unsigned long
 					}
 				}
 				/* parse src_port */
-				else if(token_cnt == 5) {
+				else if(token_cnt == 6) {
 					kstrtouint(token, 10, &ui_tmp);
 					node->src_port = (unsigned short) ui_tmp;
 					#ifdef DBG
@@ -307,7 +363,7 @@ static ssize_t procfs_write(struct file *file, const char *buffer, unsigned long
 					#endif
 				}
 				/* parse dst_port */
-				else if(token_cnt == 6) {
+				else if(token_cnt == 7) {
 					kstrtouint(token, 10, &ui_tmp);
 					node->dst_port = (unsigned short) ui_tmp;
 					#ifdef DBG
@@ -318,12 +374,21 @@ static ssize_t procfs_write(struct file *file, const char *buffer, unsigned long
 				token = strsep(&running, delim);
 				++token_cnt;
 			}
-			#ifdef DBG
+
+			if(del == 0) {
+				#ifdef DBG
 				printk("Adding node %d %d\n", node->action, node->proto);
-			#endif
-			hash_add_rcu(hashmap, &node->hash, node->proto);
+				#endif
+				hash_add_rcu(hashmap, &node->hash, node->proto);
+			}
+
+			//kfree(node);
+			//kfree(running);
 		}
 	}
+
+	
+	//kfree(line);
 	
 	return procfs_buffer_size;
 }
@@ -363,8 +428,10 @@ unsigned int hook_func_in(unsigned int hooknum, struct sk_buff *skb,
    /* TODO: IP protocol filtering */
    /* TODO: Descending rules inside one bucket need to be ascending */
    hash_for_each_possible_rcu(hashmap, node, hash, proto_key) {
+   		#ifdef DBG
    		printk("Possible rule-id %u\n", node->id);
    		printk("node->src_ip src_ip %pI4h %pI4h\n", &(node->src_ip), &src_ip);
+   		#endif
    		if(node->src_ip == 0 || node->src_ip == src_ip) {
    			if(node->dst_ip == 0 || node->dst_ip == dest_ip) {
    				if(node->src_port == 0 || node->src_port == src_port) {
@@ -458,10 +525,13 @@ void cleanup_module(){
 		if(prev != NULL) 
 			hash_del(prev);
 		kfree(node);
-		prev = &existing->hash;
-		node = existing;
+		if(&existing->hash != NULL)
+			prev = &existing->hash;
+		if(existing != NULL)
+			node = existing;
 	}
-	hash_del(prev);
+	if(prev != NULL)
+		hash_del(prev);
 	kfree(node);
 	printk("all good, module is removed\n");
 }
