@@ -283,8 +283,6 @@ ssize_t procfs_write(struct file *file, const char *buffer, unsigned long count,
 						token = strsep(&running, delim);
 						delete_rule(token);
 						del = 1;
-						/* Token should be NULL next time */
-						//break;
 					}
 					else {
 						printk(KERN_ERR "Add / delete is unknown value %s\n", token);
@@ -382,13 +380,12 @@ ssize_t procfs_write(struct file *file, const char *buffer, unsigned long count,
 				hash_add_rcu(hashmap, &node->hash, node->proto);
 			}
 
-			//kfree(node);
-			//kfree(running);
+			kfree(running);
 		}
 	}
 
 	
-	//kfree(line);
+	kfree(line);
 	
 	return procfs_buffer_size;
 }
