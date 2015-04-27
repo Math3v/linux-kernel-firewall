@@ -40,7 +40,7 @@ void send_rule_to_proc(struct rule_t rule) {
 		exit(EXIT_FAILURE);
 	}
 
-	sprintf(srule, "%d %s %s %s %s %d %d\n",
+	sprintf(srule, "a %d %s %s %s %s %d %d\n",
 		rule.id, rule.action, rule.proto,
 		rule.src_ip, rule.dst_ip,
 		rule.src_port, rule.dst_port);
@@ -135,7 +135,7 @@ void add_rule(int argc, char **argv) {
 	fclose(tmp);
 
 	parse_rules(TEMPFILE);
-	/* send_rules(); */
+	send_rules();
 
 	#ifdef DEBUG
 	for(std::list<rule_t>::iterator i = rulesList.begin(); i != rulesList.end(); ++i) {
@@ -161,7 +161,7 @@ void del_rule(char *id) {
 	#endif
 
 	sprintf(sproc, "d %s\n", id);
-	/* send_to_proc(sproc); */
+	send_to_proc(sproc);
 
 	free(sproc);
 }
@@ -182,7 +182,7 @@ int main(int argc, char *argv[]){
 				break;
 			case 'f': /* read rules from file */
 				parse_rules(optarg);
-				/*send_rules();*/
+				send_rules();
 				break;
 			default: /* unmatched argument */
 				fprintf(stderr, "Usage: %s -a rule | -p | -d rule-id | -f file>\n", 
