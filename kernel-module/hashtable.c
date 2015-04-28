@@ -13,6 +13,7 @@
 #include <linux/udp.h>
 #include <linux/tcp.h>
 #include <linux/ip.h>
+#include <linux/if_ether.h>
 
 #define INT_MAX_LEN 20
 #define LINE_MAX_SIZE 100
@@ -393,30 +394,37 @@ ssize_t procfs_write(struct file *file, const char *buffer, unsigned long count,
 unsigned int hook_func_in(unsigned int hooknum, struct sk_buff *skb, 
         const struct net_device *in, const struct net_device *out,
         int (*okfn)(struct sk_buff *)) {
- 	unsigned int proto_key = 0;
+ 	unsigned int src_ip, dst_ip, src_port, dst_port, proto_key = 0;
  	struct user_hash *node;
+ 	struct ethhdr *eth_header;
+ 	struct iphdr *ip_header;
+ 	struct udphdr *udp_header;
+ 	struct tcphdr *tcp_header;
+
+ 	eth_header = eth_hdr(skb);
+ 	if(eth_header->h_proto != htons(ETH_P_IP)) {
+ 		return NF_ACCEPT;
+ 	}
 
    /*get src address, src netmask, src port, dest ip, dest netmask, dest port, protocol*/
-   struct iphdr *ip_header = (struct iphdr *)skb_network_header(skb);
-   struct udphdr *udp_header;
-   struct tcphdr *tcp_header;
+   ip_header = (struct iphdr *)skb_network_header(skb);
  
    /**get src and dest ip addresses**/
-   unsigned int src_ip = (unsigned int)ip_header->saddr; 
-   unsigned int dest_ip = (unsigned int)ip_header->daddr; 
-   unsigned int src_port = 0;
-   unsigned int dest_port = 0;
+   src_ip = (unsigned int)ip_header->saddr; 
+   dst_ip = (unsigned int)ip_header->daddr; 
+   src_port = 0;
+   dst_port = 0;
  
    /***get src and dest port number***/
    if (ip_header->protocol == 17) { /* UDP */
        udp_header = (struct udphdr *)(skb_transport_header(skb)+20);
        src_port = (unsigned int)ntohs(udp_header->source);
-       dest_port = (unsigned int)ntohs(udp_header->dest);
+       dst_port = (unsigned int)ntohs(udp_header->dest);
        proto_key = udp;
    } else if (ip_header->protocol == 6) { /* TCP */
        tcp_header = (struct tcphdr *)(skb_transport_header(skb)+20);
        src_port = (unsigned int)ntohs(tcp_header->source);
-       dest_port = (unsigned int)ntohs(tcp_header->dest);
+       dst_port = (unsigned int)ntohs(tcp_header->dest);
        proto_key = tcp;
    } else if (ip_header->protocol == 1 ) { /* ICMP */
        proto_key = icmp;
@@ -430,9 +438,9 @@ unsigned int hook_func_in(unsigned int hooknum, struct sk_buff *skb,
    		printk("node->src_ip src_ip %pI4h %pI4h\n", &(node->src_ip), &src_ip);
    		#endif
    		if(node->src_ip == 0 || node->src_ip == src_ip) {
-   			if(node->dst_ip == 0 || node->dst_ip == dest_ip) {
+   			if(node->dst_ip == 0 || node->dst_ip == dst_ip) {
    				if(node->src_port == 0 || node->src_port == src_port) {
-   					if(node->dst_port == 0 || node->dst_port == dest_port) {
+   					if(node->dst_port == 0 || node->dst_port == dst_port) {
    						if(node->action == deny) {
    							#ifdef DBG
    							printk("packet drop\n");
@@ -453,7 +461,7 @@ unsigned int hook_func_in(unsigned int hooknum, struct sk_buff *skb,
  
  #ifdef DBG
    printk("IN packet info: src ip: %u, src port: %u; dest ip: %u, dest port: %u; proto: %u\n", 
-    src_ip, src_port, dest_ip, dest_port, ip_header->protocol); 
+    src_ip, src_port, dst_ip, dst_port, ip_header->protocol); 
  #endif
 
    return NF_ACCEPT;                
