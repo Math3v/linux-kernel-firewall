@@ -16,7 +16,7 @@ extern void yyerror( const char *s );
 
 #define PROCFILE "/proc/linux-kernel-firewall"
 #define TEMPFILE "tmp"
-#define DEBUG
+#define NO_DEBUG
 #define MAXLEN 1024
 
 void send_to_proc(char *str) {
@@ -32,8 +32,32 @@ void send_to_proc(char *str) {
 }
 
 int is_duplicate(int id) {
-	/* TODO */
-	return 0; /* false */
+	FILE *fr;
+	char *token;
+	int retval = 0; /* false */
+
+	token = (char *) calloc(MAXLEN, sizeof(char));
+	if(token == NULL) {
+		fprintf(stderr, "Cannot allocate memory\n");
+		exit(EXIT_FAILURE);
+	}
+
+	fr = fopen(PROCFILE, "r");
+	if(fr == NULL) {
+		fprintf(stderr, "Cannot open file %s\n", PROCFILE);
+		exit(EXIT_FAILURE);
+	}
+	
+  	while(fscanf(fr, "%s%*[^\n]", token) != EOF) {
+  		if(atoi(token) == id) {
+  			retval = 1; /* true */
+  		}
+  	}
+
+	fclose(fr);
+	free(token);
+
+	return retval;
 }
 
 void send_rule_to_proc(struct rule_t rule) {
