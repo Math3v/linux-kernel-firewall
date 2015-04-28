@@ -414,6 +414,31 @@ unsigned int hook_func_in(unsigned int hooknum, struct sk_buff *skb,
    dst_ip = (unsigned int)ip_header->daddr; 
    src_port = 0;
    dst_port = 0;
+
+   /* IP protocol filtering */
+   proto_key = ip;
+   hash_for_each_possible_rcu(hashmap, node, hash, proto_key) {
+   		#ifdef DBG
+   		printk("Possible rule-id %u\n", node->id);
+   		printk("node->src_ip src_ip %pI4h %pI4h\n", &(node->src_ip), &src_ip);
+   		#endif
+   		if(node->src_ip == 0 || node->src_ip == src_ip) {
+   			if(node->dst_ip == 0 || node->dst_ip == dst_ip) {
+				if(node->action == deny) {
+					#ifdef DBG
+					printk("packet drop\n");
+					#endif
+					return NF_DROP;
+				}
+				else if(node->action == allow) {
+					#ifdef DBG
+					printk("packet access\n");
+					#endif
+					return NF_ACCEPT;
+				}
+   			}
+   		}
+   }
  
    /***get src and dest port number***/
    if (ip_header->protocol == 17) { /* UDP */
@@ -428,6 +453,8 @@ unsigned int hook_func_in(unsigned int hooknum, struct sk_buff *skb,
        proto_key = tcp;
    } else if (ip_header->protocol == 1 ) { /* ICMP */
        proto_key = icmp;
+   } else {
+   		return NF_ACCEPT;
    }
 
    /* TODO: IP protocol filtering */
