@@ -24,7 +24,7 @@ MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("linux-kernel-firewall");
 MODULE_AUTHOR("Matej Minarik");
 
-DEFINE_HASHTABLE(hashmap, 4);
+DEFINE_HASHTABLE(hashmap, 16);
 
 //the structure used to register the function
 static struct nf_hook_ops nfho;
@@ -500,13 +500,13 @@ void cleanup_module(){
 	hash_for_each_rcu(hashmap, bkt, node, hash){
 		printk("node %d proto %d in bucket %d\n", node->id, node->proto, bkt);
 	}
-	printk("possible i\n");
+	printk("possible ip\n");
 	hash_for_each_possible_rcu(hashmap, node, hash, 3800){
-		printk("node %d proto %d in bucket %d\n", node->id, node->proto, bkt);
+		printk("node %d proto %d\n", node->id, node->proto);
 	}
-	printk("possible m\n");
+	printk("possible icmp\n");
 	hash_for_each_possible_rcu(hashmap, node, hash, 4200){
-		printk("node %d proto %d in bucket %d\n", node->id, node->proto, bkt);
+		printk("node %d proto %d\n", node->id, node->proto);
 	}
 #endif
 	printk("procfs cleanup\n");
