@@ -231,7 +231,7 @@ ssize_t proc_read(struct file *file, char __user *buffer, size_t count, loff_t *
     return off;
 }
 
-ssize_t procfs_write(struct file *file, const char *buffer, unsigned long count, void *data) {
+ssize_t procfs_write(struct file *file, const char __user *buffer, size_t count, loff_t *date) {
 	const char delim[2] = " ";
 	unsigned int cnt = 0, token_cnt = 0, ui_tmp = 0, del = 0;
 	char *token, *running, *line;
@@ -391,9 +391,11 @@ ssize_t procfs_write(struct file *file, const char *buffer, unsigned long count,
 	return procfs_buffer_size;
 }
 
-unsigned int hook_func_in(unsigned int hooknum, struct sk_buff *skb, 
-        const struct net_device *in, const struct net_device *out,
-        int (*okfn)(struct sk_buff *)) {
+unsigned int hook_func_in(const struct nf_hook_ops *ops,
+							struct sk_buff *skb, 
+        					const struct net_device *in,
+        					const struct net_device *out,
+        					int (*okfn)(struct sk_buff *)) {
  	unsigned int src_ip, dst_ip, src_port, dst_port, proto_key = 0;
  	struct user_hash *node;
  	struct ethhdr *eth_header;
