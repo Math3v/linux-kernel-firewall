@@ -25,15 +25,11 @@ MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("linux-kernel-firewall");
 MODULE_AUTHOR("Matej Minarik");
 
+/* Hashtable for rules */
 DEFINE_HASHTABLE(hashmap, 16);
 
-//the structure used to register the function
+/* Structure used to register the function */
 static struct nf_hook_ops nfho;
-
-//variables for procfs
-static struct proc_dir_entry *procfs;
-static char procfs_buffer[PROCFS_MAX_SIZE];
-static unsigned long procfs_buffer_size = 0;
 
 enum action_t {
 	allow,
@@ -154,7 +150,6 @@ ssize_t proc_read(struct file *file, char __user *buffer, size_t count, loff_t *
         return 0;
     }
 
-    //char * ret_str = "This is actually me!!!\n";
     hash_for_each_rcu(hashmap, bkt, node, hash) {
     	#ifdef DBG
     	printk("Sending rule-id '%d'\n", node->id);
@@ -252,6 +247,8 @@ ssize_t proc_read(struct file *file, char __user *buffer, size_t count, loff_t *
 }
 
 ssize_t procfs_write(struct file *file, const char __user *buffer, size_t count, loff_t *date) {
+	static char procfs_buffer[PROCFS_MAX_SIZE];
+	static unsigned long procfs_buffer_size = 0;
 	const char delim[2] = " ";
 	unsigned int cnt = 0, token_cnt = 0, ui_tmp = 0, del = 0;
 	char *token, *running, *line;
@@ -434,14 +431,15 @@ unsigned int hook_func_in(const struct nf_hook_ops *ops,
  	struct tcphdr *tcp_header;
 
  	eth_header = eth_hdr(skb);
+ 	/* Netfilter works with IP traffic only */
  	if(eth_header->h_proto != htons(ETH_P_IP)) {
  		return NF_ACCEPT;
  	}
 
-   /*get src address, src netmask, src port, dest ip, dest netmask, dest port, protocol*/
+   /* Get IP header from skb */
    ip_header = (struct iphdr *)skb_network_header(skb);
  
-   /**get src and dest ip addresses**/
+   /* Get IP addresses */
    src_ip = (uint32_t) ntohl(ip_header->saddr); 
    dst_ip = (uint32_t) ntohl(ip_header->daddr); 
    src_port = 0;
@@ -472,7 +470,7 @@ unsigned int hook_func_in(const struct nf_hook_ops *ops,
    		}
    }
  
-   /***get src and dest port number***/
+   /* Determine protocol and get ports */
    if (ip_header->protocol == 17) { /* UDP */
        udp_header = (struct udphdr *)(skb_network_header(skb)+20);
        src_port = (uint16_t) ntohs(udp_header->source);
@@ -489,8 +487,7 @@ unsigned int hook_func_in(const struct nf_hook_ops *ops,
    		return NF_ACCEPT;
    }
 
-   /* TODO: IP protocol filtering */
-   /* TODO: Descending rules inside one bucket need to be ascending */
+   /* Other protocols filtering */
    hash_for_each_possible_rcu(hashmap, node, hash, proto_key) {
    		#ifdef DBG
    		printk("Possible rule-id %u\n", node->id);
@@ -529,6 +526,7 @@ unsigned int hook_func_in(const struct nf_hook_ops *ops,
 }
 
 int init_module(){
+	static struct proc_dir_entry *procfs;
 	static const struct file_operations proc_file_fops = {
 		.owner = THIS_MODULE,
 	 	.write = procfs_write,
@@ -562,9 +560,9 @@ int init_module(){
 void cleanup_module(){
 	struct user_hash *node, *existing;
 	struct hlist_node *prev; 
-
-#ifdef DBG
 	unsigned int bkt = 0;
+
+	#ifdef DBG
 	hash_for_each_rcu(hashmap, bkt, node, hash){
 		printk("node %d proto %d in bucket %d\n", node->id, node->proto, bkt);
 	}
@@ -576,7 +574,8 @@ void cleanup_module(){
 	hash_for_each_possible_rcu(hashmap, node, hash, 4200){
 		printk("node %d proto %d\n", node->id, node->proto);
 	}
-#endif
+	#endif
+	
 	printk("procfs cleanup\n");
 	remove_proc_entry(PROCFS_NAME, NULL);
 
