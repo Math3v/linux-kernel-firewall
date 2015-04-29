@@ -422,7 +422,8 @@ unsigned int hook_func_in(const struct nf_hook_ops *ops,
         					const struct net_device *in,
         					const struct net_device *out,
         					int (*okfn)(struct sk_buff *)) {
- 	unsigned int src_ip, dst_ip, src_port, dst_port, proto_key;
+ 	unsigned int src_ip, dst_ip, proto_key;
+ 	uint16_t src_port, dst_port;
  	struct user_hash *node;
  	struct ethhdr *eth_header;
  	struct iphdr *ip_header;
@@ -438,8 +439,8 @@ unsigned int hook_func_in(const struct nf_hook_ops *ops,
    ip_header = (struct iphdr *)skb_network_header(skb);
  
    /**get src and dest ip addresses**/
-   src_ip = (unsigned int)ip_header->saddr; 
-   dst_ip = (unsigned int)ip_header->daddr; 
+   src_ip = (unsigned int) ntohl(ip_header->saddr); 
+   dst_ip = (unsigned int) ntohl(ip_header->daddr); 
    src_port = 0;
    dst_port = 0;
 
@@ -448,7 +449,7 @@ unsigned int hook_func_in(const struct nf_hook_ops *ops,
    hash_for_each_possible_rcu(hashmap, node, hash, proto_key) {
    		#ifdef DBG
    		printk("Possible rule-id %u\n", node->id);
-   		printk("node->src_ip src_ip %pI4h %pI4h\n", &(node->src_ip), &src_ip);
+   		printk("node->src_ip %pI4h src_ip %pI4h\n", &(node->src_ip), &src_ip);
    		#endif
    		if(node->src_ip == 0 || node->src_ip == src_ip) {
    			if(node->dst_ip == 0 || node->dst_ip == dst_ip) {
@@ -470,14 +471,14 @@ unsigned int hook_func_in(const struct nf_hook_ops *ops,
  
    /***get src and dest port number***/
    if (ip_header->protocol == 17) { /* UDP */
-       udp_header = (struct udphdr *)(skb_transport_header(skb)+20);
-       src_port = (unsigned int)ntohs(udp_header->source);
-       dst_port = (unsigned int)ntohs(udp_header->dest);
+       udp_header = (struct udphdr *)(skb_network_header(skb)+20);
+       src_port = (uint16_t) ntohs(udp_header->source);
+       dst_port = (uint16_t) ntohs(udp_header->dest);
        proto_key = udp;
    } else if (ip_header->protocol == 6) { /* TCP */
-       tcp_header = (struct tcphdr *)(skb_transport_header(skb)+20);
-       src_port = (unsigned int)ntohs(tcp_header->source);
-       dst_port = (unsigned int)ntohs(tcp_header->dest);
+       tcp_header = (struct  tcphdr *)(skb_network_header(skb)+20);
+       src_port = (uint16_t) ntohs(tcp_header->source);
+       dst_port = (uint16_t) ntohs(tcp_header->dest);
        proto_key = tcp;
    } else if (ip_header->protocol == 1 ) { /* ICMP */
        proto_key = icmp;
@@ -490,7 +491,8 @@ unsigned int hook_func_in(const struct nf_hook_ops *ops,
    hash_for_each_possible_rcu(hashmap, node, hash, proto_key) {
    		#ifdef DBG
    		printk("Possible rule-id %u\n", node->id);
-   		printk("node->src_ip src_ip %pI4h %pI4h\n", &(node->src_ip), &src_ip);
+   		printk("node->src_ip %pI4h src_ip %pI4h\n", &(node->src_ip), &src_ip);
+   		printk("node->src_port %d src_port %d\n", node->src_port, src_port);
    		#endif
    		if(node->src_ip == 0 || node->src_ip == src_ip) {
    			if(node->dst_ip == 0 || node->dst_ip == dst_ip) {
