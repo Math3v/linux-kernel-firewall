@@ -130,6 +130,7 @@ void print_rules(){
 		exit(EXIT_FAILURE);
 	}
 	
+	printf("id\taction\tsrcip\tsrcport\tdstip\tdstport\tprotocol\n");
   	while(fgets(line, MAXLEN, fr) != NULL) {
   		printf("%s", line);
   	}

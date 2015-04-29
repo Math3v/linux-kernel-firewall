@@ -72,6 +72,11 @@ unsigned int iptostr(unsigned int *ip, char **str, unsigned int maxlen) {
 	unsigned char h = (*ip) & (0x000000FF);
 	unsigned int ret = snprintf(*str, maxlen, "%u.%u.%u.%u", f, s, t, h);
 
+	if(*ip == 0) {
+		strcpy(*str, "*");
+		return 1;
+	}
+
 	remove_null(str, &ret);
 	return ret;
 }
@@ -138,7 +143,7 @@ ssize_t proc_read(struct file *file, char __user *buffer, size_t count, loff_t *
 	struct user_hash *node;
 	unsigned int bkt = 0, ret;
 	char *buff = vmalloc(LINE_MAX_SIZE);
-	char *delim = "\n", *space = " ";
+	const char *delim = "\n", *space = "\t";
 	char *c = vmalloc(INT_MAX_LEN);
 	unsigned int zero = 0, ip_len = 0;
 
@@ -152,7 +157,7 @@ ssize_t proc_read(struct file *file, char __user *buffer, size_t count, loff_t *
     	printk("Sending rule-id '%d'\n", node->id);
     	#endif
 
-    	ret = snprintf(c, INT_MAX_LEN, "%u", node->id);
+    	ret = snprintf(c, INT_MAX_LEN, "%u\t", node->id);
     	remove_null(&c, &ret);
 
     	/* add id */
@@ -161,14 +166,6 @@ ssize_t proc_read(struct file *file, char __user *buffer, size_t count, loff_t *
 
     	/* add action */
     	get_action(&node->action, &c);
-    	memcpy(buff + off, c, strlen(c));
-    	off += strlen(c);
-
-    	memcpy(buff + off, space, strlen(space));
-    	off += strlen(space);
-
-    	/* add proto */
-    	get_proto(&node->proto, &c);
     	memcpy(buff + off, c, strlen(c));
     	off += strlen(c);
 
@@ -184,6 +181,22 @@ ssize_t proc_read(struct file *file, char __user *buffer, size_t count, loff_t *
     	memcpy(buff + off, space, strlen(space));
     	off += strlen(space);
 
+    	/* add src_port */
+    	remove_null(&c, &zero);
+    	if(node->src_port == 0) {
+    		strcpy(c, "*");
+    		ret = 1;
+    	}
+    	else {
+    		ret = snprintf(c, INT_MAX_LEN, "%u", node->src_port);
+    	}
+    	remove_null(&c, &ret);
+    	memcpy(buff + off, c, ret);
+    	off += ret;
+
+    	memcpy(buff + off, space, strlen(space));
+    	off += strlen(space);
+
     	/* add dst_ip */
     	remove_null(&c, &zero);
     	ip_len = iptostr(&node->dst_ip, &c, strlen(c));
@@ -193,9 +206,15 @@ ssize_t proc_read(struct file *file, char __user *buffer, size_t count, loff_t *
     	memcpy(buff + off, space, strlen(space));
     	off += strlen(space);
 
-    	/* add src_port */
+    	/* add dst_port */
     	remove_null(&c, &zero);
-    	ret = snprintf(c, INT_MAX_LEN, "%u", node->src_port);
+    	if(node->src_port == 0) {
+    		strcpy(c, "*");
+    		ret = 1;
+    	}
+    	else {
+    		ret = snprintf(c, INT_MAX_LEN, "%u", node->dst_port);
+    	}
     	remove_null(&c, &ret);
     	memcpy(buff + off, c, ret);
     	off += ret;
@@ -203,12 +222,10 @@ ssize_t proc_read(struct file *file, char __user *buffer, size_t count, loff_t *
     	memcpy(buff + off, space, strlen(space));
     	off += strlen(space);
 
-    	/* add dst_port */
-    	remove_null(&c, &zero);
-    	ret = snprintf(c, INT_MAX_LEN, "%u", node->dst_port);
-    	remove_null(&c, &ret);
-    	memcpy(buff + off, c, ret);
-    	off += ret;
+    	/* add proto */
+    	get_proto(&node->proto, &c);
+    	memcpy(buff + off, c, strlen(c));
+    	off += strlen(c);
 
     	memcpy(buff + off, space, strlen(space));
     	off += strlen(space);
@@ -396,7 +413,7 @@ unsigned int hook_func_in(const struct nf_hook_ops *ops,
         					const struct net_device *in,
         					const struct net_device *out,
         					int (*okfn)(struct sk_buff *)) {
- 	unsigned int src_ip, dst_ip, src_port, dst_port, proto_key = 0;
+ 	unsigned int src_ip, dst_ip, src_port, dst_port, proto_key;
  	struct user_hash *node;
  	struct ethhdr *eth_header;
  	struct iphdr *ip_header;
