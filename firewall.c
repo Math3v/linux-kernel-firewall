@@ -21,6 +21,11 @@ extern void yyerror( const char *s );
 
 void send_to_proc(char *str) {
 	FILE *fw;
+
+	#ifdef DEBUG
+	printf("Sending to proc '%s'\n", str);
+	#endif
+
 	fw = fopen(PROCFILE, "w");
 	if(fw == NULL) {
 		fprintf(stderr, "Cannot open %s\n", PROCFILE);
@@ -155,8 +160,12 @@ void concat_rule(char **rule, int argc, char **argv) {
 			strcat(tmp, " ");
 	}
 
-	*rule = (char *) calloc(strlen(tmp), sizeof(char));
+	*rule = (char *) calloc(strlen(tmp) + 1, sizeof(char));
 	strcpy(*rule, tmp);
+
+	#ifdef DEBUG
+	printf("Concatenated rule '%s' in tmp '%s'\n", *rule, tmp);
+	#endif
 
 	free(tmp);
 }
@@ -172,6 +181,9 @@ void add_rule(int argc, char **argv) {
 	}
 
 	concat_rule(&line, argc, argv);
+	#ifdef DEBUG
+	printf("Line is '%s'\n", line);
+	#endif
 	fprintf(tmp, "%s\n", line);
 	fclose(tmp);
 
