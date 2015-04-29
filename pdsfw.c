@@ -424,7 +424,8 @@ unsigned int hook_func_in(const struct nf_hook_ops *ops,
         					const struct net_device *in,
         					const struct net_device *out,
         					int (*okfn)(struct sk_buff *)) {
- 	unsigned int src_ip, dst_ip, proto_key;
+ 	unsigned int proto_key;
+ 	uint32_t src_ip, dst_ip;
  	uint16_t src_port, dst_port;
  	struct user_hash *node;
  	struct ethhdr *eth_header;
@@ -441,8 +442,8 @@ unsigned int hook_func_in(const struct nf_hook_ops *ops,
    ip_header = (struct iphdr *)skb_network_header(skb);
  
    /**get src and dest ip addresses**/
-   src_ip = (unsigned int) ntohl(ip_header->saddr); 
-   dst_ip = (unsigned int) ntohl(ip_header->daddr); 
+   src_ip = (uint32_t) ntohl(ip_header->saddr); 
+   dst_ip = (uint32_t) ntohl(ip_header->daddr); 
    src_port = 0;
    dst_port = 0;
 
@@ -519,8 +520,8 @@ unsigned int hook_func_in(const struct nf_hook_ops *ops,
    }
  
  #ifdef DBG
-   printk("IN packet info: src ip: %u, src port: %u; dest ip: %u, dest port: %u; proto: %u\n", 
-    src_ip, src_port, dst_ip, dst_port, ip_header->protocol); 
+   printk("IN packet info: src ip: %pI4h, src port: %u; dest ip: %pI4h, dest port: %u proto: %u\n", 
+    &src_ip, src_port, &dst_ip, dst_port, ip_header->protocol); 
  #endif
 
    return NF_ACCEPT;                
