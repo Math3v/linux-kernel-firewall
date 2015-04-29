@@ -16,7 +16,7 @@
 #include <linux/if_ether.h>
 
 #define INT_MAX_LEN 20
-#define LINE_MAX_SIZE 100
+#define LINE_MAX_SIZE 512
 #define PROCFS_MAX_SIZE 1024
 #define PROCFS_NAME "linux-kernel-firewall"
 #define DBG
@@ -266,7 +266,9 @@ ssize_t procfs_write(struct file *file, const char __user *buffer, size_t count,
 	}
 	
 	/* write data to the buffer */
-	if ( copy_from_user(procfs_buffer, buffer, procfs_buffer_size) ) {
+	if ( copy_from_user(procfs_buffer, buffer, procfs_buffer_size) != 0) {
+		printk(KERN_ERR "ERROR: copy_from_user failed\n");
+		printk(KERN_ERR "Dump: [%lu] '%s'\n", procfs_buffer_size, procfs_buffer);
 		return -EFAULT;
 	}
 
