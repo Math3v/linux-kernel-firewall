@@ -119,6 +119,9 @@ void delete_rule(const char *aid) {
 		return;
 	}
 
+	#ifdef DBG
+	printk("Kstrtouint '%s'\n", aid);
+	#endif
 	if(kstrtouint(aid, 10, &id) != 0) {
 		printk(KERN_ERR "ERROR: kstrtouint failed\n");
 		return;
@@ -208,7 +211,7 @@ ssize_t proc_read(struct file *file, char __user *buffer, size_t count, loff_t *
 
     	/* add dst_port */
     	remove_null(&c, &zero);
-    	if(node->src_port == 0) {
+    	if(node->dst_port == 0) {
     		strcpy(c, "*");
     		ret = 1;
     	}
@@ -254,7 +257,7 @@ ssize_t procfs_write(struct file *file, const char __user *buffer, size_t count,
 	char *token, *running, *line;
 	struct user_hash *node;
 
-	line = kmalloc(LINE_MAX_SIZE, GFP_KERNEL);
+	line = vmalloc(LINE_MAX_SIZE);
 
 	/* get buffer size */
 	procfs_buffer_size = count;
@@ -281,7 +284,7 @@ ssize_t procfs_write(struct file *file, const char __user *buffer, size_t count,
 			token_cnt = 0;
 			line[cnt] = '\0';
 			node = kmalloc(sizeof(struct user_hash), GFP_KERNEL);
-			running = kmalloc(strlen(line), GFP_KERNEL);
+			running = vmalloc(strlen(line));
 			memcpy(running, line, strlen(line));
 			token = strsep(&running, delim);
 
@@ -298,7 +301,13 @@ ssize_t procfs_write(struct file *file, const char __user *buffer, size_t count,
 						del = 0;
 					}
 					else if(strcmp("d", token) == 0) {
+						#ifdef DBG
+						printk("Before strsep, running is '%s' token is '%s'\n", running, token);
+						#endif
 						token = strsep(&running, delim);
+						#ifdef DBG
+						printk("Running is '%s' token is '%s'\n", running, token);
+						#endif
 						delete_rule(token);
 						del = 1;
 					}
@@ -398,12 +407,12 @@ ssize_t procfs_write(struct file *file, const char __user *buffer, size_t count,
 				hash_add_rcu(hashmap, &node->hash, node->proto);
 			}
 
-			kfree(running);
+			vfree(running);
 		}
 	}
 
 	
-	kfree(line);
+	vfree(line);
 	
 	return procfs_buffer_size;
 }

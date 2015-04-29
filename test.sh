@@ -13,8 +13,8 @@ if [ $# == 0 ]; then
 	./pdscli -p > tmp_rules_out
 	echo -e "
 id   action 	srcip       	srcport 	dstip     	dstport 	protocol
+15   allow      147.229.1.2     *           *           8080        tcp
 10   allow  	147.229.1.1 	*       	*         	80      	tcp
-15   allow  	147.229.1.2 	*       	*         	8080    	tcp
 20   allow  	*           	53      	8.8.8.8   	*       	udp
 40   deny   	*           	*       	*         	*       	ip" > tmp_rules_ok
 	diff -w tmp_rules_out tmp_rules_ok
