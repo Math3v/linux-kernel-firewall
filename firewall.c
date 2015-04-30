@@ -15,7 +15,6 @@ extern int line_num;
 extern void yyerror( const char *s );
 
 #define PROCFILE "/proc/linux-kernel-firewall"
-#define TEMPFILE "tmp"
 #define NO_DEBUG
 #define MAXLEN 1024
 
@@ -159,6 +158,7 @@ void concat_rule(char **rule, int argc, char **argv) {
 		if(i != (argc - 1))
 			strcat(tmp, " ");
 	}
+	strcat(tmp, "\n");
 
 	*rule = (char *) calloc(strlen(tmp) + 1, sizeof(char));
 	strcpy(*rule, tmp);
@@ -172,22 +172,16 @@ void concat_rule(char **rule, int argc, char **argv) {
 
 void add_rule(int argc, char **argv) {
 	char *line;
-	FILE *tmp;
-
-	tmp = fopen(TEMPFILE, "w");
-	if(tmp == NULL) {
-		fprintf(stderr, "Cannot open file '%s'\n", TEMPFILE);
-		exit(EXIT_FAILURE);
-	}
 
 	concat_rule(&line, argc, argv);
 	#ifdef DEBUG
 	printf("Line is '%s'\n", line);
 	#endif
-	fprintf(tmp, "%s\n", line);
-	fclose(tmp);
 
-	parse_rules(TEMPFILE);
+	yyin = fmemopen((void *) line, strlen(line), "r");
+	
+	// parse through the input until there is no more:
+	yyparse();
 	send_rules();
 
 	#ifdef DEBUG
@@ -197,7 +191,6 @@ void add_rule(int argc, char **argv) {
 	#endif
 
 	free(line);
-	remove(TEMPFILE);
 }
 
 void del_rule(char *id) {
