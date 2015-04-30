@@ -48,10 +48,10 @@ struct user_hash {
 	unsigned int id;
 	enum action_t action;
 	enum proto_t proto;
-	unsigned int src_ip;
-	unsigned int dst_ip;
-	unsigned short src_port;
-	unsigned short dst_port;
+	uint32_t src_ip;
+	uint32_t dst_ip;
+	uint16_t src_port;
+	uint16_t dst_port;
 };
 
 void remove_null(char **p, unsigned int *pos) {
@@ -61,7 +61,7 @@ void remove_null(char **p, unsigned int *pos) {
 	}
 }
 
-unsigned int iptostr(unsigned int *ip, char **str, unsigned int maxlen) {
+unsigned int iptostr(uint32_t *ip, char **str, unsigned int maxlen) {
 	unsigned char f = ((*ip) & (0xFF000000)) >> 24;
 	unsigned char s = ((*ip) & (0x00FF0000)) >> 16;
 	unsigned char t = ((*ip) & (0x0000FF00)) >> 8;
