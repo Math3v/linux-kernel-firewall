@@ -19,7 +19,7 @@
 #define LINE_MAX_SIZE 512
 #define PROCFS_MAX_SIZE 1024
 #define PROCFS_NAME "linux-kernel-firewall"
-#define DBG
+#define NO_DBG
 
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("linux-kernel-firewall");
@@ -53,6 +53,21 @@ struct user_hash {
 	uint16_t src_port;
 	uint16_t dst_port;
 };
+
+void get_numbers(char **s) {
+	int i, l;
+	
+	l = strlen(*s);
+	for(i = 0; i < l; i++) {
+		if((*s)[i] >= '0' && (*s)[i] <= '9') {
+			continue;
+		}
+		else {
+			(*s)[i] = '\0';
+			break;
+		}
+	}
+}
 
 void remove_null(char **p, unsigned int *pos) {
 	unsigned int i;
@@ -105,7 +120,7 @@ void get_proto(enum proto_t *proto, char **p) {
 	}
 }
 
-void delete_rule(const char *aid) {
+void delete_rule(char *aid) {
 	unsigned int id, bkt;
 	struct user_hash *node;
 	struct hlist_node *tmp;
@@ -115,11 +130,13 @@ void delete_rule(const char *aid) {
 		return;
 	}
 
+	get_numbers(&aid);
+
 	#ifdef DBG
 	printk("Kstrtouint '%s'\n", aid);
 	#endif
 	if(kstrtouint(aid, 10, &id) != 0) {
-		printk(KERN_ERR "ERROR: kstrtouint failed\n");
+		printk(KERN_ERR "ERROR: kstrtouint failed for '%s'\n", aid);
 		return;
 	}
 
